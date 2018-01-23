@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 """ Interface for working with qdiscs """
 from __future__ import absolute_import
 from __future__ import division
@@ -119,7 +119,7 @@ def _apply_tc_rules(interface_name):
         tc['qdisc', 'add', 'dev', interface_name,
            'parent', PLUG_CLASS,
            'handle', PLUG_QDISC, 'plug']()
-    except:
+    except Exception:
         # If we can't create a plug because of an older
         # kernel, just make a fifo
         tc['qdisc', 'add', 'dev', interface_name,
@@ -165,7 +165,7 @@ def setup(interface_name, source_ip):
 def clear(interface_name, source_ip):
     try:
         tc['qdisc', 'del', 'dev', interface_name, 'root']()
-    except:
+    except Exception:
         pass
 
     # Ensure all iptables rules are purged on the output device
@@ -176,7 +176,7 @@ def clear(interface_name, source_ip):
                 '-s', source_ip, '--syn', '-j',
                 'MARK', '--set-mark', IPTABLES_MARK
             ]()
-        except:
+        except Exception:
             break
 
 

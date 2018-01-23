@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 """ Command line interface for working with qdiscs """
 from __future__ import absolute_import
 from __future__ import division
@@ -79,7 +79,7 @@ def protect_call_cmd(args):
     try:
         try:
             manage_plug(INTERFACE_NAME, enable_plug=True)
-        except:
+        except Exception:
             # If we fail to plug, it is no big deal, we might
             # drop some traffic but let's not fail to run the
             # command
@@ -96,7 +96,7 @@ def protect_call_cmd(args):
             try:
                 manage_plug(INTERFACE_NAME, enable_plug=False)
                 break
-            except:
+            except Exception:
                 log.exception('Failed to disable plug, try #%d' % i)
 
 
