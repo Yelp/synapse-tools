@@ -20,6 +20,9 @@ class PathBasedRouting(HAProxyConfigPlugin):
         file_path = os.path.join(lua_dir, 'path_based_routing.lua')
         return ['lua-load %s' % file_path]
 
+    def defaults_options(self):
+        return []
+
     def frontend_options(self):
         if not self.enabled:
             return []

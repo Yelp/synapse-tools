@@ -464,7 +464,9 @@ def generate_configuration(synapse_tools_config, zookeeper_topology, services):
                     (synapse_config['services'][service_name]['haproxy']['backend'],
                      plugin_instance.backend_options()),
                     (synapse_config['haproxy']['global'],
-                     plugin_instance.global_options())
+                     plugin_instance.global_options()),
+                    (synapse_config['haproxy']['defaults'],
+                     plugin_instance.defaults_options())
                 ]
                 for (config, opts) in config_to_opts:
                     config.extend([x for x in opts if x not in config])

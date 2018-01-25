@@ -26,6 +26,13 @@ class HAProxyConfigPlugin(object):
         """
         return
 
+    def defaults_options(self):
+        """
+        Options for HAProxy configuration defaults section
+        :return: list of strings corresponding to distinct
+                 lines in HAProxy config defaults
+        """
+
     @abc.abstractmethod
     def frontend_options(self):
         """

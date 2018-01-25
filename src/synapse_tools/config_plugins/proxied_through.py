@@ -5,6 +5,9 @@ class ProxiedThrough(HAProxyConfigPlugin):
     def global_options(self):
         return []
 
+    def defaults_options(self):
+        return []
+
     def frontend_options(self):
         if self.service_info.get('proxied_through') is None:
             return []
