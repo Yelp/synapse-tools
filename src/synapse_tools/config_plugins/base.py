@@ -26,6 +26,7 @@ class HAProxyConfigPlugin(object):
         """
         return
 
+    @abc.abstractmethod
     def defaults_options(self):
         """
         Options for HAProxy configuration defaults section
