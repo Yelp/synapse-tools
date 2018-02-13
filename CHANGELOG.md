@@ -1,7 +1,7 @@
 # Change Log
 
-## [v0.11.5](https://github.com/Yelp/synapse-tools/tree/v0.11.5) (2018-02-13)
-[Full Changelog](https://github.com/Yelp/synapse-tools/compare/v0.11.4...v0.11.5)
+## [v0.13.12](https://github.com/Yelp/synapse-tools/tree/v0.13.12) (2018-02-13)
+[Full Changelog](https://github.com/Yelp/synapse-tools/compare/v0.11.4...v0.13.12)
 
 **Merged pull requests:**
 
