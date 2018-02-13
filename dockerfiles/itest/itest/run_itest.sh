@@ -11,10 +11,12 @@ apt-get -y install -f
 echo "Testing that pyyaml uses optimized cyaml parsers if present"
 /opt/venvs/synapse-tools/bin/python -c 'import yaml; assert yaml.__with_libyaml__'
 
-source /etc/os-release
-if [[  $VERSION = *"Trusty"* ]]; then
-    echo "Trusty has issues with backports.functools_lru_cache; installing it"
-    /opt/venvs/synapse-tools/bin/pip install backports.functools_lru_cache
+if [ -f /etc/os-release ]; then
+    source /etc/os-release
+    if [[ $VERSION = *"Trusty"* ]]; then
+        echo "Trusty has issues with backports.functools_lru_cache; installing it"
+        /opt/venvs/synapse-tools/bin/pip install backports.functools_lru_cache
+    fi
 fi
 
 echo "Creating directory for unix sockets"
