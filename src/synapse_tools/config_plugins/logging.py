@@ -35,6 +35,9 @@ class Logging(HAProxyConfigPlugin):
             opts.append('setenv sample_rate {0}'.format(sample_rate))
         return opts
 
+    def defaults_options(self):
+        return []
+
     def frontend_options(self):
         return []
 

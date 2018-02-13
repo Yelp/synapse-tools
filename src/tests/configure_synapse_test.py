@@ -148,6 +148,8 @@ def test_generate_configuration(mock_get_current_location, mock_available_locati
                     'retries 2',
                     'timeout connect 2000ms',
                     'timeout server 3000ms',
+                    'acl to_be_tarpitted hdr_sub(X-Ctx-Tarpit) -i test_service',
+                    'reqtarpit . if to_be_tarpitted',
                 ],
                 'port': '1234',
                 'server_options': 'check port 6666 observe layer7 maxconn 50 maxqueue 10',
@@ -186,6 +188,10 @@ def test_generate_configuration(mock_get_current_location, mock_available_locati
             },
         },
     }
+
+    expected_configuration['haproxy']['defaults'].extend([
+        'timeout tarpit 60s',
+    ])
 
     assert actual_configuration == expected_configuration
     assert actual_configuration_reversed_advertise == expected_configuration
@@ -307,6 +313,8 @@ def test_generate_configuration_single_advertise(mock_get_current_location, mock
                     'retries 3',
                     'timeout connect 2000ms',
                     'timeout server 3000ms',
+                    'acl to_be_tarpitted hdr_sub(X-Ctx-Tarpit) -i test_service',
+                    'reqtarpit . if to_be_tarpitted',
                 ],
                 'port': '1234',
                 'server_options': 'check port 6666 observe layer7 maxconn 50 maxqueue 10',
@@ -314,6 +322,10 @@ def test_generate_configuration_single_advertise(mock_get_current_location, mock
             },
         },
     }
+
+    expected_configuration['haproxy']['defaults'].extend([
+        'timeout tarpit 60s',
+    ])
 
     assert actual_configuration == expected_configuration
     assert actual_configuration_default_advertise == expected_configuration
@@ -406,6 +418,8 @@ def test_generate_configuration_with_proxied_through(mock_get_current_location, 
                     'balance roundrobin',
                     'option httpchk GET /http/proxy_service/0/status',
                     'http-check send-state',
+                    'acl to_be_tarpitted hdr_sub(X-Ctx-Tarpit) -i proxy_service',
+                    'reqtarpit . if to_be_tarpitted',
                     'acl is_status_request path /status',
                     'reqadd X-Smartstack-Source:\\ proxy_service if !is_status_request',
                 ],
@@ -459,6 +473,8 @@ def test_generate_configuration_with_proxied_through(mock_get_current_location, 
                     'retries 2',
                     'timeout connect 2000ms',
                     'timeout server 3000ms',
+                    'acl to_be_tarpitted hdr_sub(X-Ctx-Tarpit) -i test_service',
+                    'reqtarpit . if to_be_tarpitted',
                 ],
                 'port': '1234',
                 'server_options': 'check port 6666 observe layer7 maxconn 50 maxqueue 10',
@@ -466,6 +482,10 @@ def test_generate_configuration_with_proxied_through(mock_get_current_location, 
             },
         },
     }
+
+    expected_configuration['haproxy']['defaults'].extend([
+        'timeout tarpit 60s',
+    ])
 
     assert actual_configuration == expected_configuration
 
@@ -546,6 +566,8 @@ def test_generate_configuration_with_nginx(mock_get_current_location, mock_avail
                     'retries 2',
                     'timeout connect 2000ms',
                     'timeout server 3000ms',
+                    'acl to_be_tarpitted hdr_sub(X-Ctx-Tarpit) -i test_service',
+                    'reqtarpit . if to_be_tarpitted',
                 ],
                 'port': '1234',
                 'server_options': 'check port 6666 observe layer7 maxconn 50 maxqueue 10',
@@ -608,6 +630,10 @@ def test_generate_configuration_with_nginx(mock_get_current_location, mock_avail
             'use_previous_backends': True
         },
     }
+
+    expected_configuration['haproxy']['defaults'].extend([
+        'timeout tarpit 60s',
+    ])
 
     assert actual_configuration == expected_configuration
 
@@ -688,6 +714,8 @@ def test_generate_configuration_only_nginx(mock_get_current_location, mock_avail
                     'retries 2',
                     'timeout connect 2000ms',
                     'timeout server 3000ms',
+                    'acl to_be_tarpitted hdr_sub(X-Ctx-Tarpit) -i test_service',
+                    'reqtarpit . if to_be_tarpitted',
                 ],
                 'bind_address': '/var/run/synapse/sockets/test_service.sock',
                 'server_options': 'check port 6666 observe layer7 maxconn 50 maxqueue 10',
@@ -750,6 +778,10 @@ def test_generate_configuration_only_nginx(mock_get_current_location, mock_avail
             'use_previous_backends': True
         },
     }
+
+    expected_configuration['haproxy']['defaults'].extend([
+        'timeout tarpit 60s',
+    ])
 
     assert actual_configuration == expected_configuration
 
@@ -835,6 +867,8 @@ def test_generate_configuration_with_logging_plugin(mock_get_current_location, m
                     'balance roundrobin',
                     'option httpchk GET /http/proxy_service/0/status',
                     'http-check send-state',
+                    'acl to_be_tarpitted hdr_sub(X-Ctx-Tarpit) -i proxy_service',
+                    'reqtarpit . if to_be_tarpitted',
                     'acl is_status_request path /status',
                     'reqadd X-Smartstack-Source:\\ proxy_service if !is_status_request',
                     'http-request lua.init_logging',
@@ -889,6 +923,8 @@ def test_generate_configuration_with_logging_plugin(mock_get_current_location, m
                     'retries 2',
                     'timeout connect 2000ms',
                     'timeout server 3000ms',
+                    'acl to_be_tarpitted hdr_sub(X-Ctx-Tarpit) -i test_service',
+                    'reqtarpit . if to_be_tarpitted',
                 ],
                 'port': '1234',
                 'server_options': 'check port 6666 observe layer7 maxconn 50 maxqueue 10',
@@ -1003,6 +1039,8 @@ def test_generate_configuration_with_multiple_plugins(mock_get_current_location,
                     'balance roundrobin',
                     'option httpchk GET /http/proxy_service/0/status',
                     'http-check send-state',
+                    'acl to_be_tarpitted hdr_sub(X-Ctx-Tarpit) -i proxy_service',
+                    'reqtarpit . if to_be_tarpitted',
                     'acl is_status_request path /status',
                     'reqadd X-Smartstack-Source:\\ proxy_service if !is_status_request',
                     'http-request lua.init_logging',
@@ -1059,6 +1097,8 @@ def test_generate_configuration_with_multiple_plugins(mock_get_current_location,
                     'retries 2',
                     'timeout connect 2000ms',
                     'timeout server 3000ms',
+                    'acl to_be_tarpitted hdr_sub(X-Ctx-Tarpit) -i test_service',
+                    'reqtarpit . if to_be_tarpitted',
                     'http-request lua.init_logging',
                     'http-request lua.log_provenance',
                 ],

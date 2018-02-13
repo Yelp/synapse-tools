@@ -1,5 +1,12 @@
 # Change Log
 
+## [v0.11.5](https://github.com/Yelp/synapse-tools/tree/v0.11.5) (2018-02-13)
+[Full Changelog](https://github.com/Yelp/synapse-tools/compare/v0.11.4...v0.11.5)
+
+**Merged pull requests:**
+
+- Enable fault-injection via the use of X-Ctx-Tarpit headers [\#45](https://github.com/Yelp/synapse-tools/pull/45) ([avadhutp](https://github.com/avadhutp))
+
 ## [v0.11.4](https://github.com/Yelp/synapse-tools/tree/v0.11.4) (2017-01-10)
 [Full Changelog](https://github.com/Yelp/synapse-tools/compare/v0.11.3...v0.11.4)
 
