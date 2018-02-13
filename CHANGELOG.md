@@ -1,5 +1,12 @@
 # Change Log
 
+## [v0.13.13](https://github.com/Yelp/synapse-tools/tree/v0.13.13) (2018-02-13)
+[Full Changelog](https://github.com/Yelp/synapse-tools/compare/v0.13.12...v0.13.13)
+
+**Merged pull requests:**
+
+- Fix lucid builds [\#45](https://github.com/Yelp/synapse-tools/pull/46) ([avadhutp](https://github.com/avadhutp))
+
 ## [v0.13.12](https://github.com/Yelp/synapse-tools/tree/v0.13.12) (2018-02-13)
 [Full Changelog](https://github.com/Yelp/synapse-tools/compare/v0.11.4...v0.13.12)
 
