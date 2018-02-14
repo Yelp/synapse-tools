@@ -1,3 +1,9 @@
+synapse-tools (0.13.14) lucid; urgency=low
+
+  * Enable fault-injection via X-Ctx-Tarpit header
+
+ -- Avadhut Phatarpekar <avadhutp@yelp.com>  Wed, 14 Feb 2018 05:26:49 -0700
+
 synapse-tools (0.13.11) lucid; urgency=low
 
   * Sampling provenance plugin
