@@ -7,3 +7,4 @@ pyroute2==0.3.4
 paasta-tools==0.56.0
 setuptools==33.1.1
 tox-pip-extensions==1.1.0
+backports.functools_lru_cache==1.2.1
