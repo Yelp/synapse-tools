@@ -3,24 +3,26 @@ itest:
   hostname: itesthost.itestdomain
   volumes:
    - .:/work
+  environment:
+    CONTAINER_PREFIX: lucid
   links:
-   - servicetwo
-   - servicethree
-   - servicethreechaos
-   - serviceone
-   - zookeeper
+   - lucidservicetwo
+   - lucidservicethree
+   - lucidservicethreechaos
+   - lucidserviceone
+   - lucidzookeeper
 
-servicethree:
+lucidservicethree:
   build: dockerfiles/itest/service_three
 
-serviceone:
+lucidserviceone:
   build: dockerfiles/itest/service_one
 
-zookeeper:
+lucidzookeeper:
   build: dockerfiles/itest/zookeeper
 
-servicethreechaos:
+lucidservicethreechaos:
   build: dockerfiles/itest/service_three
 
-servicetwo:
+lucidservicetwo:
   build: dockerfiles/itest/service_two

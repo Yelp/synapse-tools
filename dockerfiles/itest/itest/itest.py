@@ -11,7 +11,8 @@ import kazoo.client
 import pytest
 
 
-ZOOKEEPER_CONNECT_STRING = "zookeeper_1:2181"
+CONTAINER_PREFIX = os.environ.get('CONTAINER_PREFIX', 'na')
+ZOOKEEPER_CONNECT_STRING = CONTAINER_PREFIX + "zookeeper_1:2181"
 
 
 # Authoritative data for tests
@@ -19,7 +20,7 @@ SERVICES = {
     # HTTP service with a custom endpoint
     'service_three.main': {
         'host': 'servicethree_1',
-        'ip_address': socket.gethostbyname('servicethree_1'),
+        'ip_address': socket.gethostbyname(CONTAINER_PREFIX + 'servicethree_1'),
         'port': 1024,
         'proxy_port': 20060,
         'mode': 'http',
@@ -31,7 +32,7 @@ SERVICES = {
     # HTTP service with a custom endpoint
     'service_three.logging': {
         'host': 'servicethree_1',
-        'ip_address': socket.gethostbyname('servicethree_1'),
+        'ip_address': socket.gethostbyname(CONTAINER_PREFIX + 'servicethree_1'),
         'port': 1024,
         'proxy_port': 20050,
         'mode': 'http',
@@ -43,7 +44,7 @@ SERVICES = {
     # TCP service
     'service_one.main': {
         'host': 'serviceone_1',
-        'ip_address': socket.gethostbyname('serviceone_1'),
+        'ip_address': socket.gethostbyname(CONTAINER_PREFIX + 'serviceone_1'),
         'port': 1025,
         'proxy_port': 20028,
         'mode': 'tcp',
@@ -54,7 +55,7 @@ SERVICES = {
     # HTTP service with a custom endpoint and chaos
     'service_three_chaos.main': {
         'host': 'servicethreechaos_1',
-        'ip_address': socket.gethostbyname('servicethreechaos_1'),
+        'ip_address': socket.gethostbyname(CONTAINER_PREFIX + 'servicethreechaos_1'),
         'port': 1024,
         'proxy_port': 20061,
         'mode': 'http',
@@ -67,7 +68,7 @@ SERVICES = {
     # HTTP with headers required for the healthcheck
     'service_two.main': {
         'host': 'servicetwo_1',
-        'ip_address': socket.gethostbyname('servicetwo_1'),
+        'ip_address': socket.gethostbyname(CONTAINER_PREFIX + 'servicetwo_1'),
         'port': 1999,
         'proxy_port': 20090,
         'mode': 'http',

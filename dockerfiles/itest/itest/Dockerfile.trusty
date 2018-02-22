@@ -76,8 +76,11 @@ ADD synapse-tools.conf.json /etc/synapse/synapse-tools.conf.json
 ADD synapse-tools-both.conf.json /etc/synapse/synapse-tools-both.conf.json
 ADD synapse-tools-nginx.conf.json /etc/synapse/synapse-tools-nginx.conf.json
 
+# Zookeeper discovery
+RUN mkdir -p /nail/etc/zookeeper_discovery/infrastructure
+ADD zookeeper_discovery/infrastructure/local.yaml.trusty /nail/etc/zookeeper_discovery/infrastructure/local.yaml
+
 ADD yelpsoa-configs /nail/etc/services
-ADD zookeeper_discovery /nail/etc/zookeeper_discovery
 ADD habitat /nail/etc/habitat
 ADD ecosystem /nail/etc/ecosystem
 ADD region /nail/etc/region
