@@ -3,24 +3,26 @@ itest:
   hostname: itesthost.itestdomain
   volumes:
    - .:/work
+  environment:
+    CONTAINER_PREFIX: trusty
   links:
-   - servicetwo
-   - servicethree
-   - servicethreechaos
-   - serviceone
-   - zookeeper
+   - trustyservicetwo
+   - trustyservicethree
+   - trustyservicethreechaos
+   - trustyserviceone
+   - trustyzookeeper
 
-servicethree:
+trustyservicethree:
   build: dockerfiles/itest/service_three
 
-serviceone:
+trustyserviceone:
   build: dockerfiles/itest/service_one
 
-zookeeper:
+trustyzookeeper:
   build: dockerfiles/itest/zookeeper
 
-servicethreechaos:
+trustyservicethreechaos:
   build: dockerfiles/itest/service_three
 
-servicetwo:
+trustyservicetwo:
   build: dockerfiles/itest/service_two

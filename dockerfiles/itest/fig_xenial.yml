@@ -3,24 +3,26 @@ itest:
   hostname: itesthost.itestdomain
   volumes:
    - .:/work
+  environment:
+    CONTAINER_PREFIX: xenial
   links:
-   - servicetwo
-   - servicethree
-   - servicethreechaos
-   - serviceone
-   - zookeeper
+   - xenialservicetwo
+   - xenialservicethree
+   - xenialservicethreechaos
+   - xenialserviceone
+   - xenialzookeeper
 
-servicethree:
+xenialservicethree:
   build: dockerfiles/itest/service_three
 
-serviceone:
+xenialserviceone:
   build: dockerfiles/itest/service_one
 
-zookeeper:
+xenialzookeeper:
   build: dockerfiles/itest/zookeeper
 
-servicethreechaos:
+xenialservicethreechaos:
   build: dockerfiles/itest/service_three
 
-servicetwo:
+xenialservicetwo:
   build: dockerfiles/itest/service_two
