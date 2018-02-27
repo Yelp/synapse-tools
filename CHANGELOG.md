@@ -1,5 +1,12 @@
 # Change Log
 
+## [v0.13.16](https://github.com/Yelp/synapse-tools/tree/v0.13.16) (2018-02-27)
+[Full Changelog](https://github.com/Yelp/synapse-tools/compare/v0.13.15...v0.13.16)
+
+**Merged pull requests:**
+
+- Fix simultaneous builds on a single Jenkins box [\#49](https://github.com/Yelp/synapse-tools/pull/49) ([avadhutp](https://github.com/avadhutp))
+
 ## [v0.13.15](https://github.com/Yelp/synapse-tools/tree/v0.13.15) (2018-02-16)
 [Full Changelog](https://github.com/Yelp/synapse-tools/compare/v0.13.14...v0.13.15)
 
