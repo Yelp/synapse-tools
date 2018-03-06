@@ -1,5 +1,12 @@
 # Change Log
 
+## [v0.13.17](https://github.com/Yelp/synapse-tools/tree/v0.13.17) (2018-03-06)
+[Full Changelog](https://github.com/Yelp/synapse-tools/compare/v0.13.16...v0.13.17)
+
+**Merged pull requests:**
+
+- Add X-Smartstack-Source header to all services [\#50](https://github.com/Yelp/synapse-tools/pull/50) ([avadhutp](https://github.com/avadhutp))
+
 ## [v0.13.16](https://github.com/Yelp/synapse-tools/tree/v0.13.16) (2018-02-27)
 [Full Changelog](https://github.com/Yelp/synapse-tools/compare/v0.13.15...v0.13.16)
 

@@ -1,8 +1,8 @@
-synapse-tools (0.13.16) lucid; urgency=low
+synapse-tools (0.13.17) lucid; urgency=low
 
-  * Fix simultaneous builds on a single Jenkins Box
+  * Add X-Smartstack-Source header to all service backends
 
- -- Avadhut Phatarpekar <avadhutp@yelp.com>  Tue, 27 Feb 2018 02:00:23 -0700
+ -- Avadhut Phatarpekar <avadhutp@yelp.com>  Tue, 06 March 2018 02:00:23 -0700
 
 synapse-tools (0.13.15) lucid; urgency=low
 
