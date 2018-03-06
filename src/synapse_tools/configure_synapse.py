@@ -640,6 +640,8 @@ def _generate_haproxy_for_watcher(service_name, service_info, synapse_tools_conf
     if timeout_server_ms is not None:
         backend_options.append('timeout server %dms' % timeout_server_ms)
 
+    backend_options.append('reqadd X-Smartstack-Source:\ %s' % service_name)
+
     return {
         'server_options': server_options,
         'frontend': frontend_options,
