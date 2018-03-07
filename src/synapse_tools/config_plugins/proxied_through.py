@@ -34,4 +34,18 @@ class ProxiedThrough(HAProxyConfigPlugin):
         ]
 
     def backend_options(self):
-        return []
+        # We are not a proxy for someone else
+        if not self.service_info.get('is_proxy', False):
+            return []
+
+        healthcheck_uri = self.service_info.get('healthcheck_uri', '/status')
+        service_name = self.service_name
+
+        return [
+            'acl is_status_request path {healthcheck_uri}'.format(
+                healthcheck_uri=healthcheck_uri
+            ),
+            'reqadd X-Smartstack-Source:\ {service_name} if !is_status_request'.format(
+                service_name=service_name,
+            ),
+        ]
