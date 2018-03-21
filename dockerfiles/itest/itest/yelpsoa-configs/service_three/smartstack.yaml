@@ -27,6 +27,6 @@ logging:
   advertise:
   - habitat
   plugins:
-    logging: 
+    logging:
       enabled: True
       sample_rate: 1

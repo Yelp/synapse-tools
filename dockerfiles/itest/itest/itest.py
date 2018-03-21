@@ -432,6 +432,19 @@ def test_logging_plugin(setup):
         check_plugin_logs(log_file, expected)
 
 
+def test_source_required_plugin(setup):
+    # Test plugins with only HAProxy
+    if 'nginx' not in setup and 'both' not in setup:
+
+        name = 'service_two.main'
+        data = SERVICES[name]
+        url = 'http://localhost:%d%s' % (data['proxy_port'], data['healthcheck_uri'])
+
+        request = urllib2.Request(url=url)
+        with contextlib.closing(
+            urllib2.urlopen(request, timeout=SOCKET_TIMEOUT)) as page:
+            assert page.info().dict['x-smartstack-origin'] == 'Test'
+
 # Helper for sending requests
 def send_requests(urls, headers=None):
     for url in urls:
@@ -449,6 +462,6 @@ def check_plugin_logs(log_file, expected):
             matching_logs = filter(lambda x: expected in x, logs)
             assert len(matching_logs) >= 1
 
-    except IOError as e:
+    except IOError:
         assert False
 
