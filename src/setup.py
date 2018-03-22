@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='synapse-tools',
-    version='0.13.18-rcAPOLLO-457',
+    version='0.13.18',
     provides=['synapse_tools'],
     author='John Billings',
     author_email='billings@yelp.com',

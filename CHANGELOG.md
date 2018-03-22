@@ -1,5 +1,12 @@
 # Change Log
 
+## [v0.13.18](https://github.com/Yelp/synapse-tools/tree/v0.13.18) (2018-03-22)
+[Full Changelog](https://github.com/Yelp/synapse-tools/compare/v0.13.16...v0.13.18)
+
+**Merged pull requests:**
+
+- Enabled the source_required plugin [\#52](https://github.com/Yelp/synapse-tools/pull/52) ([avadhutp](https://github.com/avadhutp))
+
 ## [v0.13.16](https://github.com/Yelp/synapse-tools/tree/v0.13.16) (2018-02-27)
 [Full Changelog](https://github.com/Yelp/synapse-tools/compare/v0.13.15...v0.13.16)
 
