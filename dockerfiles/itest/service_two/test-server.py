@@ -6,6 +6,12 @@ PORT = 1999
 
 class BlockingGetHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
+    def end_headers(self):
+        for header in self.headers.keys():
+            self.send_header(header, self.headers[header])
+
+        SimpleHTTPServer.SimpleHTTPRequestHandler.end_headers(self)
+
     def do_GET(self):
         logging.warning(self.headers)
         if 'x-mode' not in self.headers.keys():
@@ -13,12 +19,6 @@ class BlockingGetHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         else:
             SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
 
-
-class GetHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
-
-    def do_GET(self):
-        logging.warning(self.headers)
-        SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
 
 httpd = SocketServer.TCPServer(("0.0.0.0", PORT), BlockingGetHandler)
 

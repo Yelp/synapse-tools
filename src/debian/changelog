@@ -1,3 +1,10 @@
+synapse-tools (0.13.18) lucid; urgency=low
+
+  * Enable source_required plugin
+
+ -- Avadhut Phatarpekar <avadhutp@yelp.com>  Thu, 22 Mar 2018 02:00:23 -0700
+
+
 synapse-tools (0.13.16) lucid; urgency=low
 
   * Fix simultaneous builds on a single Jenkins Box

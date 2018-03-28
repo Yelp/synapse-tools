@@ -13,3 +13,6 @@ main:
     X-Mode: ro
   extra_healthcheck_headers:
     X-Mode: ro
+  plugins:
+    source_required:
+      enabled: True

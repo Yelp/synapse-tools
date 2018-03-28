@@ -247,6 +247,13 @@ def _generate_haproxy_top_level(synapse_tools_config):
         }
     }
 
+    # Add the ip_to_svc.map as a haproxy top-level map_file environment variable
+    map_dir = synapse_tools_config['map_dir']
+    map_file = os.path.join(map_dir, 'ip_to_service.map')
+    top_level['global'].append(
+        'setenv map_file %s' % map_file,
+    )
+
     # Just for the migration to HAProxy 1.7, when SMTSTK-190 is done
     # always have this enabled and set the default to a sane default instead
     # of None
