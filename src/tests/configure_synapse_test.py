@@ -853,6 +853,8 @@ def test_generate_configuration_with_source_required_plugin(mock_get_current_loc
                     'use_backend test_service if test_service_has_connslots',
                 ],
                 'backend': [
+                    'http-request lua.init_add_source',
+                    'http-request lua.add_source_header',
                     'balance roundrobin',
                     'reqidel ^X-Mode:.*',
                     'reqadd X-Mode:\ ro',
@@ -863,8 +865,6 @@ def test_generate_configuration_with_source_required_plugin(mock_get_current_loc
                     'timeout server 3000ms',
                     'acl to_be_tarpitted hdr_sub(X-Ctx-Tarpit) -i test_service',
                     'reqtarpit . if to_be_tarpitted',
-                    'http-request lua.init_add_source',
-                    'http-request lua.add_source_header',
                 ],
                 'port': '1234',
                 'server_options': 'check port 6666 observe layer7 maxconn 50 maxqueue 10',

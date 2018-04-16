@@ -9,6 +9,7 @@ class SourceRequired(HAProxyConfigPlugin):
         )
 
         self.enabled = self.plugins.get('source_required', {}).get('enabled', False)
+        self.prepend_backend_options = True
 
     def global_options(self):
         if not self.enabled:

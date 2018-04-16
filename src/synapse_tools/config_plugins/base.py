@@ -16,6 +16,18 @@ class HAProxyConfigPlugin(object):
         self.service_info = service_info
         self.synapse_tools_config = synapse_tools_config
         self.plugins = service_info.get('plugins', {})
+        self.prepend_frontend_options = False
+        self.prepend_backend_options = False
+        self.prepend_global_options = False
+        self.prepend_defaults_options = False
+
+    def prepend_options(self, block_type):
+        """
+        Checks to see if the options to a particular HAProxy block
+        are to be prepended or appended. This is useful, for example, when
+        you want to order your http-request rules above any reqxxx rules.
+        """
+        return eval('self.prepend_{}_options'.format(block_type))
 
     @abc.abstractmethod
     def global_options(self):
