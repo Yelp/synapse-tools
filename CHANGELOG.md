@@ -1,5 +1,12 @@
 # Change Log
 
+## [v0.13.19](https://github.com/Yelp/synapse-tools/tree/v0.13.19) (2018-04-16)
+[Full Changelog](https://github.com/Yelp/synapse-tools/compare/v0.13.18...v0.13.19)
+
+**Merged pull requests:**
+
+- Allow plugins to reorder their directives [\#53](https://github.com/Yelp/synapse-tools/pull/53) ([avadhutp](https://github.com/avadhutp))
+
 ## [v0.13.18](https://github.com/Yelp/synapse-tools/tree/v0.13.18) (2018-03-22)
 [Full Changelog](https://github.com/Yelp/synapse-tools/compare/v0.13.16...v0.13.18)
 

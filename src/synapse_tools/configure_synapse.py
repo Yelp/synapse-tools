@@ -467,16 +467,20 @@ def generate_configuration(synapse_tools_config, zookeeper_topology, services):
                 )
                 config_to_opts = [
                     (synapse_config['services'][service_name]['haproxy']['frontend'],
-                     plugin_instance.frontend_options()),
+                     plugin_instance.frontend_options(), plugin_instance.prepend_options('frontend')),
                     (synapse_config['services'][service_name]['haproxy']['backend'],
-                     plugin_instance.backend_options()),
+                     plugin_instance.backend_options(), plugin_instance.prepend_options('backend')),
                     (synapse_config['haproxy']['global'],
-                     plugin_instance.global_options()),
+                     plugin_instance.global_options(), plugin_instance.prepend_options('global')),
                     (synapse_config['haproxy']['defaults'],
-                     plugin_instance.defaults_options())
+                     plugin_instance.defaults_options(), plugin_instance.prepend_options('defaults'))
                 ]
-                for (config, opts) in config_to_opts:
-                    config.extend([x for x in opts if x not in config])
+                for (config, opts, prepend_options) in config_to_opts:
+                    options = [x for x in opts if x not in config]
+                    if prepend_options:
+                        config[0:0] += options
+                    else:
+                        config.extend(options)
 
             # TODO(jlynch|2017-08-15): move this to a plugin!
             # populate the ACLs to route to the service backends, this must

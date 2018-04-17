@@ -1,3 +1,9 @@
+synapse-tools (0.13.19) lucid; urgency=low
+
+  * Allow plugins to reorder their directives
+
+ -- Avadhut Phatarpekar <avadhutp@yelp.com>  Thu, 16 Apr 2018 02:00:23 -0700
+
 synapse-tools (0.13.18) lucid; urgency=low
 
   * Enable source_required plugin
