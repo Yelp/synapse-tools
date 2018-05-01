@@ -23,7 +23,7 @@ function add_source_header(txn)
   
   src_svc = map:lookup(ip)
   if src_svc == nil then
-    return
+    src_svc = '0'
   end
 
   -- Add header
