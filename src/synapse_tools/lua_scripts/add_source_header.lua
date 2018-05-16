@@ -10,6 +10,9 @@ core.register_action('init_add_source', {'tcp-req', 'http-req'}, init_add_source
 
 -- Add source header to the request
 function add_source_header(txn)
+  -- First, explicitly remove any existing origin headers to avoid spoofing
+  txn.http:req_del_header('X-Smartstack-Origin')
+
   -- Don't log if map doesn't exist or sampled out
   if (map == nil) then
     return
@@ -20,10 +23,10 @@ function add_source_header(txn)
   if ip == nil then
     ip = 'nil'
   end
-  
+
   src_svc = map:lookup(ip)
   if src_svc == nil then
-    return
+    src_svc = '0'
   end
 
   -- Add header

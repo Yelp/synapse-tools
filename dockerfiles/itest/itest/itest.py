@@ -103,8 +103,12 @@ YIELD_PARAMS = [
 ]
 
 
-@pytest.yield_fixture(scope='module', params=YIELD_PARAMS)
+@pytest.yield_fixture(scope='class', params=YIELD_PARAMS)
 def setup(request):
+    pre_setup = getattr(request.node._obj, "pre_setup", None)
+    if callable(pre_setup):
+        pre_setup()
+
     try:
         os.makedirs(SYNAPSE_ROOT_DIR)
     except OSError:
@@ -172,296 +176,329 @@ def _sort_lists_in_dict(d):
     return d
 
 
-def test_haproxy_config_valid(setup):
-    subprocess.check_call(['haproxy-synapse', '-c', '-f', '/var/run/synapse/haproxy.cfg'])
+class TestGroupOne(object):
+    def test_haproxy_config_valid(self, setup):
+        subprocess.check_call(['haproxy-synapse', '-c', '-f', '/var/run/synapse/haproxy.cfg'])
 
 
-def test_haproxy_synapse_reaper(setup):
-    # This should run with no errors.  Everything is running as root, so we need
-    # to use the --username option here.
-    subprocess.check_call(['haproxy_synapse_reaper', '--username', 'root'])
+    def test_haproxy_synapse_reaper(self, setup):
+        # This should run with no errors.  Everything is running as root, so we need
+        # to use the --username option here.
+        subprocess.check_call(['haproxy_synapse_reaper', '--username', 'root'])
 
 
-def test_synapse_qdisc_tool(setup):
-    # Can't actually manipulate qdisc or iptables in a docker, so this
-    # is what we have for now
-    subprocess.check_call(['synapse_qdisc_tool', '--help'])
+    def test_synapse_qdisc_tool(self, setup):
+        # Can't actually manipulate qdisc or iptables in a docker, so this
+        # is what we have for now
+        subprocess.check_call(['synapse_qdisc_tool', '--help'])
 
 
-def test_synapse_services(setup):
-    expected_services = [
-        'service_three.main',
-        'service_three.main.region',
-        'service_one.main',
-        'service_three_chaos.main',
-        'service_two.main',
-        'service_three.logging',
-    ]
-
-    with open('/etc/synapse/synapse.conf.json') as fd:
-        synapse_config = json.load(fd)
-    actual_services = synapse_config['services'].keys()
-
-    # nginx adds listener "services" which contain the proxy
-    # back to HAProxy sockets which actually do the load balancing
-    if setup in SYNAPSE_TOOLS_CONFIGURATIONS['nginx']:
-        nginx_services = [
-            'service_three_chaos.main.nginx_listener',
-            'service_one.main.nginx_listener',
-            'service_two.main.nginx_listener',
-            'service_three.main.nginx_listener',
-            'service_three.logging.nginx_listener',
+    def test_synapse_services(self, setup):
+        expected_services = [
+            'service_three.main',
+            'service_three.main.region',
+            'service_one.main',
+            'service_three_chaos.main',
+            'service_two.main',
+            'service_three.logging',
         ]
-        expected_services.extend(nginx_services)
 
-    assert set(expected_services) == set(actual_services)
+        with open('/etc/synapse/synapse.conf.json') as fd:
+            synapse_config = json.load(fd)
+        actual_services = synapse_config['services'].keys()
+
+        # nginx adds listener "services" which contain the proxy
+        # back to HAProxy sockets which actually do the load balancing
+        if setup in SYNAPSE_TOOLS_CONFIGURATIONS['nginx']:
+            nginx_services = [
+                'service_three_chaos.main.nginx_listener',
+                'service_one.main.nginx_listener',
+                'service_two.main.nginx_listener',
+                'service_three.main.nginx_listener',
+                'service_three.logging.nginx_listener',
+            ]
+            expected_services.extend(nginx_services)
+
+        assert set(expected_services) == set(actual_services)
 
 
-def test_http_synapse_service_config(setup):
-    expected_service_entry = {
-        'default_servers': [],
-        'use_previous_backends': False,
-        'discovery': {
-            'hosts': [ZOOKEEPER_CONNECT_STRING],
-            'method': 'zookeeper',
-            'path': '/smartstack/global/service_three.main',
-            'label_filters': [
-                {
-                    'label': 'habitat:my_habitat',
-                    'value': '',
-                    'condition': 'equals',
-                },
-            ],
+    def test_http_synapse_service_config(self, setup):
+        expected_service_entry = {
+            'default_servers': [],
+            'use_previous_backends': False,
+            'discovery': {
+                'hosts': [ZOOKEEPER_CONNECT_STRING],
+                'method': 'zookeeper',
+                'path': '/smartstack/global/service_three.main',
+                'label_filters': [
+                    {
+                        'label': 'habitat:my_habitat',
+                        'value': '',
+                        'condition': 'equals',
+                    },
+                ],
+            }
+       }
+
+        with open('/etc/synapse/synapse.conf.json') as fd:
+            synapse_config = json.load(fd)
+
+        actual_service_entry = synapse_config['services'].get('service_three.main')
+
+        # Unit tests already test the contents of the haproxy and nginx sections
+        # itests operate at a higher level of abstraction and need not care about
+        # how exactly SmartStack achieves the goal of load balancing
+        # So, we just check that the sections are there, but not what's in them!
+        assert 'haproxy' in actual_service_entry
+        del actual_service_entry['haproxy']
+        if setup in SYNAPSE_TOOLS_CONFIGURATIONS['nginx']:
+            assert 'nginx' in actual_service_entry
+            del actual_service_entry['nginx']
+
+        actual_service_entry = _sort_lists_in_dict(actual_service_entry)
+        expected_service_entry = _sort_lists_in_dict(expected_service_entry)
+
+        assert expected_service_entry == actual_service_entry
+
+
+    def test_backup_http_synapse_service_config(self, setup):
+        expected_service_entry = {
+            'default_servers': [],
+            'use_previous_backends': False,
+            'discovery': {
+                'hosts': [ZOOKEEPER_CONNECT_STRING],
+                'method': 'zookeeper',
+                'path': '/smartstack/global/service_three.main',
+                'label_filters': [
+                    {
+                        'label': 'region:my_region',
+                        'value': '',
+                        'condition': 'equals',
+                    },
+                ],
+            }
         }
-   }
 
-    with open('/etc/synapse/synapse.conf.json') as fd:
-        synapse_config = json.load(fd)
+        with open('/etc/synapse/synapse.conf.json') as fd:
+            synapse_config = json.load(fd)
 
-    actual_service_entry = synapse_config['services'].get('service_three.main')
+        actual_service_entry = synapse_config['services'].get('service_three.main.region')
 
-    # Unit tests already test the contents of the haproxy and nginx sections
-    # itests operate at a higher level of abstraction and need not care about
-    # how exactly SmartStack achieves the goal of load balancing
-    # So, we just check that the sections are there, but not what's in them!
-    assert 'haproxy' in actual_service_entry
-    del actual_service_entry['haproxy']
-    if setup in SYNAPSE_TOOLS_CONFIGURATIONS['nginx']:
-        assert 'nginx' in actual_service_entry
-        del actual_service_entry['nginx']
+        # Unit tests already test the contents of the haproxy and nginx sections
+        # itests operate at a higher level of abstraction and need not care about
+        # how exactly SmartStack achieves the goal of load balancing
+        # So, we just check that the sections are there, but not what's in them!
+        assert 'haproxy' in actual_service_entry
+        del actual_service_entry['haproxy']
+        if setup in SYNAPSE_TOOLS_CONFIGURATIONS['nginx']:
+            assert 'nginx' in actual_service_entry
+            del actual_service_entry['nginx']
 
-    actual_service_entry = _sort_lists_in_dict(actual_service_entry)
-    expected_service_entry = _sort_lists_in_dict(expected_service_entry)
+        actual_service_entry = _sort_lists_in_dict(actual_service_entry)
+        expected_service_entry = _sort_lists_in_dict(expected_service_entry)
 
-    assert expected_service_entry == actual_service_entry
+        assert expected_service_entry == actual_service_entry
 
 
-def test_backup_http_synapse_service_config(setup):
-    expected_service_entry = {
-        'default_servers': [],
-        'use_previous_backends': False,
-        'discovery': {
-            'hosts': [ZOOKEEPER_CONNECT_STRING],
-            'method': 'zookeeper',
-            'path': '/smartstack/global/service_three.main',
-            'label_filters': [
-                {
-                    'label': 'region:my_region',
-                    'value': '',
-                    'condition': 'equals',
-                },
-            ],
+    def test_tcp_synapse_service_config(self, setup):
+        expected_service_entry = {
+            'default_servers': [],
+            'use_previous_backends': False,
+            'discovery': {
+                'hosts': [ZOOKEEPER_CONNECT_STRING],
+                'method': 'zookeeper',
+                'path': '/smartstack/global/service_one.main',
+                'label_filters': [
+                    {
+                        'label': 'region:my_region',
+                        'value': '',
+                        'condition': 'equals',
+                    },
+                ],
+            },
         }
-    }
 
-    with open('/etc/synapse/synapse.conf.json') as fd:
-        synapse_config = json.load(fd)
+        with open('/etc/synapse/synapse.conf.json') as fd:
+            synapse_config = json.load(fd)
+        actual_service_entry = synapse_config['services'].get('service_one.main')
 
-    actual_service_entry = synapse_config['services'].get('service_three.main.region')
+        # Unit tests already test the contents of the haproxy and nginx sections
+        # itests operate at a higher level of abstraction and need not care about
+        # how exactly SmartStack achieves the goal of load balancing
+        # So, we just check that the sections are there, but not what's in them!
+        assert 'haproxy' in actual_service_entry
+        del actual_service_entry['haproxy']
+        if setup in SYNAPSE_TOOLS_CONFIGURATIONS['nginx']:
+            assert 'nginx' in actual_service_entry
+            del actual_service_entry['nginx']
 
-    # Unit tests already test the contents of the haproxy and nginx sections
-    # itests operate at a higher level of abstraction and need not care about
-    # how exactly SmartStack achieves the goal of load balancing
-    # So, we just check that the sections are there, but not what's in them!
-    assert 'haproxy' in actual_service_entry
-    del actual_service_entry['haproxy']
-    if setup in SYNAPSE_TOOLS_CONFIGURATIONS['nginx']:
-        assert 'nginx' in actual_service_entry
-        del actual_service_entry['nginx']
+        actual_service_entry = _sort_lists_in_dict(actual_service_entry)
+        expected_service_entry = _sort_lists_in_dict(expected_service_entry)
 
-    actual_service_entry = _sort_lists_in_dict(actual_service_entry)
-    expected_service_entry = _sort_lists_in_dict(expected_service_entry)
-
-    assert expected_service_entry == actual_service_entry
+        assert expected_service_entry == actual_service_entry
 
 
-def test_tcp_synapse_service_config(setup):
-    expected_service_entry = {
-        'default_servers': [],
-        'use_previous_backends': False,
-        'discovery': {
-            'hosts': [ZOOKEEPER_CONNECT_STRING],
-            'method': 'zookeeper',
-            'path': '/smartstack/global/service_one.main',
-            'label_filters': [
-                {
-                    'label': 'region:my_region',
-                    'value': '',
-                    'condition': 'equals',
-                },
-            ],
-        },
-    }
-
-    with open('/etc/synapse/synapse.conf.json') as fd:
-        synapse_config = json.load(fd)
-    actual_service_entry = synapse_config['services'].get('service_one.main')
-
-    # Unit tests already test the contents of the haproxy and nginx sections
-    # itests operate at a higher level of abstraction and need not care about
-    # how exactly SmartStack achieves the goal of load balancing
-    # So, we just check that the sections are there, but not what's in them!
-    assert 'haproxy' in actual_service_entry
-    del actual_service_entry['haproxy']
-    if setup in SYNAPSE_TOOLS_CONFIGURATIONS['nginx']:
-        assert 'nginx' in actual_service_entry
-        del actual_service_entry['nginx']
-
-    actual_service_entry = _sort_lists_in_dict(actual_service_entry)
-    expected_service_entry = _sort_lists_in_dict(expected_service_entry)
-
-    assert expected_service_entry == actual_service_entry
-
-
-def test_hacheck(setup):
-    for name, data in SERVICES.iteritems():
-        # Just test our HTTP service
-        if data['mode'] != 'http':
-            continue
-
-        url = 'http://%s:6666/http/%s/0%s' % (
-            data['ip_address'], name, data['healthcheck_uri'])
-
-        headers = {
-            'X-Haproxy-Server-State':
-                'UP 2/3; host=srv2; port=%d; name=bck/srv2;'
-                'node=lb1; weight=1/2; scur=13/22; qcur=0' % data['port']
-        }
-        headers.update(data.get('extra_healthcheck_headers', {}))
-
-        request = urllib2.Request(url=url, headers=headers)
-
-        with contextlib.closing(
-                urllib2.urlopen(request, timeout=SOCKET_TIMEOUT)) as page:
-            assert page.read().strip() == 'OK'
-
-
-def test_synapse_haproxy_stats_page(setup):
-    haproxy_stats_uri = 'http://localhost:32123/;csv'
-
-    with contextlib.closing(
-            urllib2.urlopen(haproxy_stats_uri, timeout=SOCKET_TIMEOUT)) as haproxy_stats:
-        reader = csv.DictReader(haproxy_stats)
-        rows = [(row['# pxname'], row['svname'], row['check_status']) for row in reader]
-
+    def test_hacheck(self, setup):
         for name, data in SERVICES.iteritems():
-            if 'chaos' in data:
+            # Just test our HTTP service
+            if data['mode'] != 'http':
                 continue
 
-            svname = '%s_%s:%d' % (data['host'], data['ip_address'], data['port'])
-            check_status = 'L7OK'
-            assert (name, svname, check_status) in rows
+            url = 'http://%s:6666/http/%s/0%s' % (
+                data['ip_address'], name, data['healthcheck_uri'])
 
+            headers = {
+                'X-Haproxy-Server-State':
+                    'UP 2/3; host=srv2; port=%d; name=bck/srv2;'
+                    'node=lb1; weight=1/2; scur=13/22; qcur=0' % data['port']
+            }
+            headers.update(data.get('extra_healthcheck_headers', {}))
 
-def test_http_service_is_accessible_using_haproxy(setup):
-    for name, data in SERVICES.iteritems():
-        if data['mode'] == 'http' and 'chaos' not in data:
-            uri = 'http://localhost:%d%s' % (data['proxy_port'], data['healthcheck_uri'])
-            with contextlib.closing(urllib2.urlopen(uri, timeout=SOCKET_TIMEOUT)) as page:
+            request = urllib2.Request(url=url, headers=headers)
+
+            with contextlib.closing(
+                    urllib2.urlopen(request, timeout=SOCKET_TIMEOUT)) as page:
                 assert page.read().strip() == 'OK'
 
 
-def test_tcp_service_is_accessible_using_haproxy(setup):
-    for name, data in SERVICES.iteritems():
-        if data['mode'] == 'tcp':
-            s = socket.create_connection(
-                address=(data['ip_address'], data['port']),
-                timeout=SOCKET_TIMEOUT)
-            s.close()
+    def test_synapse_haproxy_stats_page(self, setup):
+        haproxy_stats_uri = 'http://localhost:32123/;csv'
+
+        with contextlib.closing(
+                urllib2.urlopen(haproxy_stats_uri, timeout=SOCKET_TIMEOUT)) as haproxy_stats:
+            reader = csv.DictReader(haproxy_stats)
+            rows = [(row['# pxname'], row['svname'], row['check_status']) for row in reader]
+
+            for name, data in SERVICES.iteritems():
+                if 'chaos' in data:
+                    continue
+
+                svname = '%s_%s:%d' % (data['host'], data['ip_address'], data['port'])
+                check_status = 'L7OK'
+                assert (name, svname, check_status) in rows
 
 
-def test_file_output(setup):
-    output_directory = os.path.join(SYNAPSE_ROOT_DIR, 'services')
-    for name, data in SERVICES.iteritems():
-        with open(os.path.join(output_directory, name + '.json')) as f:
-            service_data = json.load(f)
-            if 'chaos' in data:
-                assert len(service_data) == 0
-                continue
-
-            assert len(service_data) == 1
-
-            service_instance = service_data[0]
-            assert service_instance['name'] == data['host']
-            assert service_instance['port'] == data['port']
-            assert service_instance['host'] == data['ip_address']
+    def test_http_service_is_accessible_using_haproxy(self, setup):
+        for name, data in SERVICES.iteritems():
+            if data['mode'] == 'http' and 'chaos' not in data:
+                uri = 'http://localhost:%d%s' % (data['proxy_port'], data['healthcheck_uri'])
+                with contextlib.closing(urllib2.urlopen(uri, timeout=SOCKET_TIMEOUT)) as page:
+                    assert page.read().strip() == 'OK'
 
 
-def test_http_service_returns_503(setup):
-    data = SERVICES['service_three_chaos.main']
-    uri = 'http://localhost:%d%s' % (data['proxy_port'], data['healthcheck_uri'])
-    with pytest.raises(urllib2.HTTPError) as excinfo:
-        with contextlib.closing(urllib2.urlopen(uri, timeout=SOCKET_TIMEOUT)):
+    def test_tcp_service_is_accessible_using_haproxy(self, setup):
+        for name, data in SERVICES.iteritems():
+            if data['mode'] == 'tcp':
+                s = socket.create_connection(
+                    address=(data['ip_address'], data['port']),
+                    timeout=SOCKET_TIMEOUT)
+                s.close()
+
+
+    def test_file_output(self, setup):
+        output_directory = os.path.join(SYNAPSE_ROOT_DIR, 'services')
+        for name, data in SERVICES.iteritems():
+            with open(os.path.join(output_directory, name + '.json')) as f:
+                service_data = json.load(f)
+                if 'chaos' in data:
+                    assert len(service_data) == 0
+                    continue
+
+                assert len(service_data) == 1
+
+                service_instance = service_data[0]
+                assert service_instance['name'] == data['host']
+                assert service_instance['port'] == data['port']
+                assert service_instance['host'] == data['ip_address']
+
+
+    def test_http_service_returns_503(self, setup):
+        data = SERVICES['service_three_chaos.main']
+        uri = 'http://localhost:%d%s' % (data['proxy_port'], data['healthcheck_uri'])
+        with pytest.raises(urllib2.HTTPError) as excinfo:
+            with contextlib.closing(urllib2.urlopen(uri, timeout=SOCKET_TIMEOUT)):
+                assert False
+            assert excinfo.value.getcode() == 503
+
+
+    def test_logging_plugin(self, setup):
+        # Test plugins with only HAProxy
+        if 'nginx' not in setup and 'both' not in setup:
+
+            # Send mock requests
+            name = 'service_three.logging'
+            data = SERVICES[name]
+            url = 'http://localhost:%d%s' % (data['proxy_port'], data['healthcheck_uri'])
+            self.send_requests(urls=[url])
+
+            # Check for requests in log file
+            log_file = '/var/log/haproxy.log'
+            expected = 'provenance Test service_three.logging'
+            self. check_plugin_logs(log_file, expected)
+
+
+    def test_source_required_plugin(self, setup):
+        # Test plugins with only HAProxy
+        if 'nginx' not in setup and 'both' not in setup:
+
+            name = 'service_two.main'
+            data = SERVICES[name]
+            url = 'http://localhost:%d%s' % (data['proxy_port'], data['healthcheck_uri'])
+
+            # First, test with the service IP present in the map file
+            request = urllib2.Request(url=url, headers={'X-Smartstack-Origin': 'Spoof-Value'})
+            with contextlib.closing(
+                urllib2.urlopen(request, timeout=SOCKET_TIMEOUT)) as page:
+                assert page.info().dict['x-smartstack-origin'] == 'Test'
+
+    # Helper for sending requests
+    def send_requests(self, urls, headers=None):
+        for url in urls:
+            request = urllib2.Request(url=url)
+            with contextlib.closing(
+                urllib2.urlopen(request, timeout=SOCKET_TIMEOUT)) as page:
+                assert page.read().strip() == 'OK'
+
+
+    # Helper for checking requests logged by logging plugin
+    def check_plugin_logs(self, log_file, expected):
+        try:
+            with open(log_file) as f:
+                logs = f.readlines()
+                matching_logs = filter(lambda x: expected in x, logs)
+                assert len(matching_logs) >= 1
+
+        except IOError:
             assert False
-        assert excinfo.value.getcode() == 503
 
 
-def test_logging_plugin(setup):
-    # Test plugins with only HAProxy
-    if 'nginx' not in setup and 'both' not in setup:
+class TestGroupTwo(object):
+    @staticmethod
+    def pre_setup():
+        """Remove the entry for 127.0.0.1
+        from the maps file to simulate a call
+        from an unknown service.
+        """
+        map_file = '/var/run/synapse/maps/ip_to_service.map'
+        f = open(map_file, "r+")
+        lines = f.readlines()
+        f.seek(0)
+        for l in lines:
+            if not l.startswith('127.0.0.1'):
+                f.write(l)
+        f.truncate()
+        f.close()
 
-        # Send mock requests
-        name = 'service_three.logging'
-        data = SERVICES[name]
-        url = 'http://localhost:%d%s' % (data['proxy_port'], data['healthcheck_uri'])
-        send_requests(urls=[url])
+    def test_source_required_plugin_without_map_entry(self, setup):
+        # Test plugins with only HAProxy
+        if 'nginx' not in setup and 'both' not in setup:
 
-        # Check for requests in log file
-        log_file = '/var/log/haproxy.log'
-        expected = 'provenance Test service_three.logging'
-        check_plugin_logs(log_file, expected)
+            name = 'service_two.main'
+            data = SERVICES[name]
+            url = 'http://localhost:%d%s' % (data['proxy_port'], data['healthcheck_uri'])
 
-
-def test_source_required_plugin(setup):
-    # Test plugins with only HAProxy
-    if 'nginx' not in setup and 'both' not in setup:
-
-        name = 'service_two.main'
-        data = SERVICES[name]
-        url = 'http://localhost:%d%s' % (data['proxy_port'], data['healthcheck_uri'])
-
-        request = urllib2.Request(url=url)
-        with contextlib.closing(
-            urllib2.urlopen(request, timeout=SOCKET_TIMEOUT)) as page:
-            assert page.info().dict['x-smartstack-origin'] == 'Test'
-
-# Helper for sending requests
-def send_requests(urls, headers=None):
-    for url in urls:
-        request = urllib2.Request(url=url)
-        with contextlib.closing(
-            urllib2.urlopen(request, timeout=SOCKET_TIMEOUT)) as page:
-            assert page.read().strip() == 'OK'
-
-
-# Helper for checking requests logged by logging plugin
-def check_plugin_logs(log_file, expected):
-    try:
-        with open(log_file) as f:
-            logs = f.readlines()
-            matching_logs = filter(lambda x: expected in x, logs)
-            assert len(matching_logs) >= 1
-
-    except IOError:
-        assert False
-
+            # First, test with the service IP present in the map file
+            request = urllib2.Request(url=url, headers={'X-Smartstack-Origin': 'Spoof-Value'})
+            with contextlib.closing(
+                urllib2.urlopen(request, timeout=SOCKET_TIMEOUT)) as page:
+                assert page.info().dict['x-smartstack-origin'] == '0'
