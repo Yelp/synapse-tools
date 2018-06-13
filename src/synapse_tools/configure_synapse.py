@@ -72,6 +72,7 @@ def set_defaults(config):
         # http://nginx.org/en/docs/control.html#upgrade
         # This is apparently how you gracefully reload the binary ...
         ('nginx_reload_cmd_fmt',
+            'if [ -f {nginx_pid_file_path}.oldbin ]; then kill -TERM $(cat {nginx_pid_file_path}) && sleep 2; fi ; '
             'kill -USR2 $(cat {nginx_pid_file_path}) && sleep 2 && '
             'kill -WINCH $(cat {nginx_pid_file_path}.oldbin) && '
             'kill -QUIT $(cat {nginx_pid_file_path}.oldbin)'),
