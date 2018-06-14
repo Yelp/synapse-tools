@@ -1,5 +1,12 @@
 # Change Log
 
+## [v0.13.21](https://github.com/Yelp/synapse-tools/tree/v0.13.21) (2018-06-14)
+[Full Changelog](https://github.com/Yelp/synapse-tools/compare/v0.13.20...v0.13.21)
+
+**Merged pull requests:**
+
+- Clean up old shutting-down nginx if we need to reload again. [\#56](https://github.com/Yelp/synapse-tools/pull/56) ([EvanKrall](https://github.com/EvanKrall))
+
 ## [v0.13.20](https://github.com/Yelp/synapse-tools/tree/v0.13.20) (2018-05-16)
 [Full Changelog](https://github.com/Yelp/synapse-tools/compare/v0.13.19...v0.13.20)
 
