@@ -33,6 +33,5 @@ class SourceRequired(HAProxyConfigPlugin):
         if not self.enabled:
             return []
         return [
-            'http-request lua.init_add_source',
             'http-request lua.add_source_header'
         ]

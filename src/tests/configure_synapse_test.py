@@ -854,7 +854,6 @@ def test_generate_configuration_with_source_required_plugin(mock_get_current_loc
                     'use_backend test_service if test_service_has_connslots',
                 ],
                 'backend': [
-                    'http-request lua.init_add_source',
                     'http-request lua.add_source_header',
                     'balance roundrobin',
                     'reqidel ^X-Mode:.*',

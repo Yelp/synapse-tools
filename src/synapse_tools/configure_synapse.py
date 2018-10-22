@@ -61,6 +61,7 @@ def set_defaults(config):
         ('stats_port', 3212),
         ('lua_dir', os.path.join(os.path.dirname(synapse_tools.__file__), 'lua_scripts')),
         ('map_dir', '/var/run/synapse/maps/'),
+        ('map_refresh_interval', 5),
         ('logging', {'enabled': False}),
         # NGINX related options
         ('listen_with_nginx', False),
@@ -253,6 +254,10 @@ def _generate_haproxy_top_level(synapse_tools_config):
     map_file = os.path.join(map_dir, 'ip_to_service.map')
     top_level['global'].append(
         'setenv map_file %s' % map_file,
+    )
+    map_refresh_interval = synapse_tools_config['map_refresh_interval']
+    top_level['global'].append(
+        'setenv map_refresh_interval %d' % map_refresh_interval,
     )
 
     # Just for the migration to HAProxy 1.7, when SMTSTK-190 is done
