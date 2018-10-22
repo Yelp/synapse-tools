@@ -1,9 +1,9 @@
 Source: synapse-tools
 Maintainer: John Billings <billings@yelp.com>
 Build-Depends:
-    dh-virtualenv,
+    dh-virtualenv, python3.6
 
-Depends: python2.7, sudo, socat, ${shlibs:Depends}
+Depends: python3.6, sudo, socat, ${shlibs:Depends}
 Package: synapse-tools
 Architecture: any
 Description: Synapse-related tools for use on Yelp machines.

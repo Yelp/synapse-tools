@@ -4,7 +4,7 @@ plumbum==1.6.0
 psutil==2.1.1
 PyYAML==3.11
 pyroute2==0.3.4
-paasta-tools==0.56.0
-setuptools==33.1.1
+paasta-tools==0.81.3
+setuptools==37.0.0
 tox-pip-extensions==1.1.0
 backports.functools_lru_cache==1.2.1

@@ -23,8 +23,8 @@ setup(
         'psutil>=2.1.1,<2.2.0',
         'PyYAML>=3.11,<4.0.0',
         'pyroute2>=0.3.4,<0.4.0',
-        'paasta-tools==0.56.0',
-        'setuptools<34',
+        'paasta-tools==0.81.3',
+        'setuptools==37.0.0',
     ],
     entry_points={
         'console_scripts': [
