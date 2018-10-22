@@ -37,7 +37,7 @@ function add_source_header(txn)
   txn.http:req_del_header('X-Smartstack-Origin')
 
   -- Don't log if map doesn't exist or sampled out
-  if (map == nil) then
+  if (map == {}) then
     return
   end
 
@@ -55,4 +55,4 @@ function add_source_header(txn)
   -- Add header
   txn.http:req_add_header('X-Smartstack-Origin', src_svc)
 end
-core.register_action('add_source_header', {'tcp-req', 'http-req'}, add_source_header)
+core.register_action('add_source_header', {'http-req'}, add_source_header)
