@@ -1,3 +1,9 @@
+synapse-tools (0.13.22) lucid; urgency=medium
+
+  * Moving to python 3 and removing support for Lucid
+
+ -- Evan Krall <krall@yelp.com>  Thu, 14 Jun 2018 16:05:35 -0700
+
 synapse-tools (0.13.21) lucid; urgency=medium
 
   * Clean up old shutting-down nginx if we need to reload again.
