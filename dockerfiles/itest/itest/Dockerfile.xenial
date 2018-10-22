@@ -1,15 +1,20 @@
 FROM ubuntu:xenial
 MAINTAINER John Billings <billings@yelp.com>
 
+# Need Python 3.6
+RUN apt-get update > /dev/null && \
+    apt-get install -y --no-install-recommends software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa
+
 RUN apt-get update && apt-get -y install \
     libcurl3 \
     iptables \
+    python3.6 \
     python-setuptools \
     python-pytest \
     python-pycurl \
     python-kazoo \
     python-zope.interface \
-    python2.7 \
     ruby \
     ruby-dev \
     libxml2 \

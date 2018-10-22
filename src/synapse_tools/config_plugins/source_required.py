@@ -1,5 +1,5 @@
 import os
-from base import HAProxyConfigPlugin
+from synapse_tools.config_plugins.base import HAProxyConfigPlugin
 
 
 class SourceRequired(HAProxyConfigPlugin):

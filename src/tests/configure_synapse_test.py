@@ -27,7 +27,7 @@ def mock_available_location_types():
         'region',
         'habitat',
     ]
-    with contextlib.nested(
+    patchers = [
         mock.patch(
             'environment_tools.type_utils.available_location_types',
             return_value=mock_types,
@@ -36,15 +36,16 @@ def mock_available_location_types():
             'synapse_tools.configure_synapse.available_location_types',
             return_value=mock_types,
         ),
-    ):
-        yield
+    ]
+
+    with contextlib.ExitStack() as stack:
+        yield tuple(stack.enter_context(patch) for patch in patchers)
 
 
 def test_get_zookeeper_topology():
     m = mock.mock_open()
-    with contextlib.nested(
-            mock.patch('synapse_tools.configure_synapse.open', m, create=True),
-            mock.patch('yaml.load', return_value=[['foo', 42]])):
+
+    with mock.patch('synapse_tools.configure_synapse.open', m, create=True), mock.patch('yaml.load', return_value=[['foo', 42]]):
         zk_topology = configure_synapse.get_zookeeper_topology('/path/to/fake/file')
     assert zk_topology == ['foo:42']
     m.assert_called_with('/path/to/fake/file')
@@ -1231,23 +1232,27 @@ def setup_mocks_for_main():
     mock_copy = mock.Mock()
     mock_subprocess_check_call = mock.Mock()
 
-    with contextlib.nested(
-            mock.patch('synapse_tools.configure_synapse.get_zookeeper_topology'),
-            mock.patch('synapse_tools.configure_synapse.get_all_namespaces'),
-            mock.patch('synapse_tools.configure_synapse.generate_configuration'),
-            mock.patch(
-                'synapse_tools.configure_synapse.get_config',
-                return_value=configure_synapse.set_defaults(
-                    {'bind_addr': '0.0.0.0', 'config_file': '/etc/synapse/synapse.conf.json'}
-                ),
+    patchers = [
+        mock.patch('synapse_tools.configure_synapse.get_zookeeper_topology'),
+        mock.patch('synapse_tools.configure_synapse.get_all_namespaces'),
+        mock.patch('synapse_tools.configure_synapse.generate_configuration'),
+        mock.patch(
+            'synapse_tools.configure_synapse.get_config',
+            return_value=configure_synapse.set_defaults(
+                {'bind_addr': '0.0.0.0', 'config_file': '/etc/synapse/synapse.conf.json'}
             ),
-            mock.patch('tempfile.NamedTemporaryFile', return_value=mock_tmp_file),
-            mock.patch('synapse_tools.configure_synapse.open', create=True),
-            mock.patch('json.dump'),
-            mock.patch('os.chmod'),
-            mock.patch('filecmp.cmp', mock_file_cmp),
-            mock.patch('shutil.copy', mock_copy),
-            mock.patch('subprocess.check_call', mock_subprocess_check_call)):
+        ),
+        mock.patch('tempfile.NamedTemporaryFile', return_value=mock_tmp_file),
+        mock.patch('synapse_tools.configure_synapse.open', create=True),
+        mock.patch('json.dump'),
+        mock.patch('os.chmod'),
+        mock.patch('filecmp.cmp', mock_file_cmp),
+        mock.patch('shutil.copy', mock_copy),
+        mock.patch('subprocess.check_call', mock_subprocess_check_call),
+    ]
+
+    with contextlib.ExitStack() as stack:
+        [stack.enter_context(patch) for patch in patchers]
         yield(mock_tmp_file, mock_file_cmp, mock_copy, mock_subprocess_check_call)
 
 

@@ -1,5 +1,0 @@
-lucid:
-  build: dockerfiles/lucid
-  command: bash -c "cd src && tox -elucid && dpkg-buildpackage -d -uc -us && mv ../*.deb ../dist/"
-  volumes:
-   - .:/work

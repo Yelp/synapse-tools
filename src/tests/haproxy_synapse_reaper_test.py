@@ -70,7 +70,7 @@ def test_get_alumni(mock_get_main_pid, mock_process_iter):
 @mock.patch('synapse_tools.haproxy_synapse_reaper.time.time')
 @mock.patch('synapse_tools.haproxy_synapse_reaper.os.path.getctime')
 @mock.patch('synapse_tools.haproxy_synapse_reaper.os.path.exists')
-@mock.patch('__builtin__.open')
+@mock.patch('builtins.open')
 def test_kill_alumni_if_too_old(mock_open, mock_exists, mock_getctime, mock_time):
     alumni = [
         # This process has no pidfile in the state_dir and exceeds the reap age
@@ -98,7 +98,7 @@ def test_kill_alumni_if_too_old(mock_open, mock_exists, mock_getctime, mock_time
 @mock.patch('synapse_tools.haproxy_synapse_reaper.time.time')
 @mock.patch('synapse_tools.haproxy_synapse_reaper.os.path.getctime')
 @mock.patch('synapse_tools.haproxy_synapse_reaper.os.path.exists')
-@mock.patch('__builtin__.open')
+@mock.patch('builtins.open')
 def test_kill_alumni_if_too_many(mock_open, mock_exists, mock_getctime, mock_time):
     alumni = [
         create_mock_process(pid=42, create_time=124),

@@ -297,7 +297,7 @@ def generate_base_config(synapse_tools_config):
     # errorfile 503 /etc/haproxy-synapse/errors/503.http
     error_list = [
         "errorfile {} {}".format(error, errorfile)
-        for error, errorfile in synapse_tools_config.get('errorfiles', {}).iteritems()
+        for error, errorfile in synapse_tools_config.get('errorfiles', {}).items()
     ]
     base_config['haproxy']['defaults'].extend(error_list)
 
@@ -542,16 +542,26 @@ def _generate_captured_request_headers(synapse_tools_config):
     return headers
 
 
+def _get_default_timeout(service_info):
+    timeout_client_ms = service_info.get('timeout_client_ms')
+    timeout_server_ms = service_info.get('timeout_server_ms')
+
+    if timeout_client_ms is None and timeout_server_ms is None:
+        return None
+
+    return max(
+        timeout_client_ms or 0,
+        timeout_server_ms or 0
+    )
+
+
 def _generate_haproxy_for_watcher(service_name, service_info, synapse_tools_config):
     # Note that validations of all the following config options are done in
     # config post-receive so invalid config should never get here
 
     # If the service sets one timeout but not the other, set both
     # as per haproxy best practices.
-    default_timeout = max(
-        service_info.get('timeout_client_ms'),
-        service_info.get('timeout_server_ms')
-    )
+    default_timeout = _get_default_timeout(service_info)
 
     # Server options
     # Things that get appended to each server line in HAProxy
@@ -604,9 +614,9 @@ def _generate_haproxy_for_watcher(service_name, service_info, synapse_tools_conf
         backend_options.append('mode tcp')
 
     extra_headers = service_info.get('extra_headers', {})
-    for header, value in extra_headers.iteritems():
+    for header, value in extra_headers.items():
         backend_options.append('reqidel ^%s:.*' % (header))
-    for header, value in extra_headers.iteritems():
+    for header, value in extra_headers.items():
         backend_options.append('reqadd %s:\ %s' % (header, value))
 
     # hacheck healthchecking
@@ -618,7 +628,7 @@ def _generate_haproxy_for_watcher(service_name, service_info, synapse_tools_conf
 
     if len(extra_healthcheck_headers) > 0:
         healthcheck_base = 'HTTP/1.1'
-        headers_string = healthcheck_base + ''.join(r'\r\n%s:\ %s' % (k, v) for (k, v) in extra_healthcheck_headers.iteritems())
+        headers_string = healthcheck_base + ''.join(r'\r\n%s:\ %s' % (k, v) for (k, v) in extra_healthcheck_headers.items())
     else:
         headers_string = ""
 
@@ -766,7 +776,7 @@ def merge_dict_for_my_grouping(chaos_dict):
         {'some_key': some_value, 'another_key': another_value}
     """
     result = {}
-    for grouping_type, grouping_dict in chaos_dict.iteritems():
+    for grouping_type, grouping_dict in chaos_dict.items():
         my_grouping = get_my_grouping(grouping_type)
         entry = grouping_dict.get(my_grouping, {})
         result.update(entry)

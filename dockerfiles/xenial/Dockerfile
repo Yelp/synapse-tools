@@ -1,12 +1,17 @@
 FROM ubuntu:xenial
 MAINTAINER John Billings <billings@yelp.com>
 
+# Need Python 3.6
+RUN apt-get update > /dev/null && \
+    apt-get install -y --no-install-recommends software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa
+
 RUN apt-get update && apt-get -y install \
     debhelper \
     dpkg-dev \
     libyaml-dev \
     libcurl4-openssl-dev \
-    python-dev \
+    python3.6-dev \
     python-tox \
     python-setuptools \
     libffi-dev \
