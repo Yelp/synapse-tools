@@ -1,8 +1,14 @@
+synapse-tools (0.13.23) lucid; urgency=medium
+
+  * Moving to python 3 and removing support for Lucid
+
+ -- Avadhut Phatarpeakr <avadhutp@yelp.com>  Mon, 22 Oct 2018 16:05:35 -0700
+
 synapse-tools (0.13.22) lucid; urgency=medium
 
   * Moving to python 3 and removing support for Lucid
 
- -- Evan Krall <krall@yelp.com>  Thu, 14 Jun 2018 16:05:35 -0700
+ -- Avadhut Phatarpeakr <avadhutp@yelp.com>  Mon, 22 Oct 2018 16:05:35 -0700
 
 synapse-tools (0.13.21) lucid; urgency=medium
 
@@ -160,7 +166,7 @@ synapse-tools (0.11.7) lucid; urgency=low
 
 synapse-tools (0.11.6) lucid; urgency=low
 
-  * Release 0.11.6 
+  * Release 0.11.6
 
  -- Kyle Anderson <kwa@yelp.com>  Tue, 21 Feb 2017 14:04:42 -0800
 
