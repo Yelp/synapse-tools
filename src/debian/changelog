@@ -1,3 +1,9 @@
+synapse-tools (0.13.24) lucid; urgency=medium
+
+  * Make the add_source_header plugin resilient to absence of map file
+
+ -- Avadhut Phatarpeakr <avadhutp@yelp.com>  Thu, 25 Oct 2018 16:05:35 -0700
+
 synapse-tools (0.13.23) lucid; urgency=medium
 
   * Moving to python 3 and removing support for Lucid
