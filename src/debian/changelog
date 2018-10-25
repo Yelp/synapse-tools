@@ -1,3 +1,9 @@
+synapse-tools (0.13.25) lucid; urgency=medium
+
+  * Incorporating review feedback: s/msg/err typo
+
+ -- Avadhut Phatarpeakr <avadhutp@yelp.com>  Thu, 25 Oct 2018 16:05:35 -0700
+
 synapse-tools (0.13.24) lucid; urgency=medium
 
   * Make the add_source_header plugin resilient to absence of map file

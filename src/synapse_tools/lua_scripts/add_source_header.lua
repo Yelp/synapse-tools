@@ -3,7 +3,7 @@ map_file = nil
 refresh_interval = nil
 
 function log_error(err)
-  core.log(core.err, msg)
+  core.log(core.err, err)
 end
 
 function refresh_map()
