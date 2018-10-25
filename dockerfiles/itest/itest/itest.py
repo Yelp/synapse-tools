@@ -502,3 +502,29 @@ class TestGroupTwo(object):
             with contextlib.closing(
                 urllib2.urlopen(request, timeout=SOCKET_TIMEOUT)) as page:
                 assert page.info().dict['x-smartstack-origin'] == '0'
+
+
+class TestGroupThree(object):
+    @staticmethod
+    def pre_setup():
+        """Remove the map file to simulate what happens
+        on boxes (such as role::devbox) where the map file
+        is not generated at all.
+        """
+        map_file = '/var/run/synapse/maps/ip_to_service.map'
+        if os.path.isfile(map_file):
+            os.remove(map_file)
+
+    def test_source_required_plugin_without_map_entry(self, setup):
+        # Test plugins with only HAProxy
+        if 'nginx' not in setup and 'both' not in setup:
+
+            name = 'service_two.main'
+            data = SERVICES[name]
+            url = 'http://localhost:%d%s' % (data['proxy_port'], data['healthcheck_uri'])
+
+            # First, test with the service IP present in the map file
+            request = urllib2.Request(url=url, headers={'X-Smartstack-Origin': 'Spoof-Value'})
+            with contextlib.closing(
+                urllib2.urlopen(request, timeout=SOCKET_TIMEOUT)) as page:
+                assert page.info().dict['x-smartstack-origin'] == '0'

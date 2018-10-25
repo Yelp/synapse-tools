@@ -2,6 +2,10 @@ map = {}
 map_file = nil
 refresh_interval = nil
 
+function log_error(err)
+  core.log(core.err, msg)
+end
+
 function refresh_map()
   map = Map.new(map_file, Map.str)
 end
@@ -9,7 +13,7 @@ end
 function init_vars()
   map_file = os.getenv('map_file')
   if map_file == nil then
-     core.log(core.err, 'map_file variable not set! This will cause authentication to fail for some requests.')
+     log_error('map_file variable not set! This will cause authentication to fail for some requests.')
    end
 
   refresh_interval = os.getenv('map_refresh_interval')
@@ -18,15 +22,15 @@ end
 -- This is run soon after haproxy parses haproxy.cfg. We will
 -- load the ip_to_svc map for the first time here.
 core.register_init(function()
-  init_vars()
-  refresh_map()
+  xpcall(init_vars, log_error)
+  xpcall(refresh_map, log_error)
 end)
 
 -- This will register a task, to refresh the ip_to_svc map,
 -- to run every 5 seconds
 core.register_task(function()
   while true do
-    refresh_map()
+    xpcall(refresh_map, log_error)
     core.sleep(refresh_interval)
   end
 end)
