@@ -1,3 +1,9 @@
+synapse-tools (0.13.26) lucid; urgency=medium
+
+  * Removing the change that caused DAR-396
+
+ -- Avadhut Phatarpeakr <avadhutp@yelp.com>  Fri, 26 Oct 2018 16:05:35 -0700
+
 synapse-tools (0.13.25) lucid; urgency=medium
 
   * Incorporating review feedback: s/msg/err typo
