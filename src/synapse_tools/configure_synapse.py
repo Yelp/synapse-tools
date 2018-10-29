@@ -3,6 +3,7 @@ changed."""
 
 import copy
 import filecmp
+import hashlib
 import json
 import os
 import shutil
@@ -141,6 +142,13 @@ def _generate_nginx_top_level(synapse_tools_config):
     }
 
 
+def _generate_server_order_seed():
+    return int(
+        (hashlib.md5(socket.gethostname().encode('utf-8'))).hexdigest(),
+        16
+    )
+
+
 def _generate_haproxy_top_level(synapse_tools_config):
     haproxy_inter = synapse_tools_config['haproxy.defaults.inter']
     top_level = {
@@ -155,7 +163,7 @@ def _generate_haproxy_top_level(synapse_tools_config):
         'do_writes': True,
         'do_reloads': True,
         'do_socket': True,
-        'server_order_seed': hash(socket.gethostname()),
+        'server_order_seed': _generate_server_order_seed(),
 
         'global': [
             'daemon',
