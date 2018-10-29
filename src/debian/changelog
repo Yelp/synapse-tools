@@ -1,3 +1,9 @@
+synapse-tools (0.13.27) lucid; urgency=medium
+
+  * Implement determinisitic hashing in python 3
+
+ -- Avadhut Phatarpeakr <avadhutp@yelp.com>  Mon, 29 Oct 2018 16:05:35 -0700
+
 synapse-tools (0.13.26) lucid; urgency=medium
 
   * Removing the change that caused DAR-396
