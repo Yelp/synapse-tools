@@ -192,6 +192,11 @@ class TestGroupOne(object):
         # is what we have for now
         subprocess.check_call(['synapse_qdisc_tool', '--help'])
 
+    def test_generate_map(self, setup):
+        # generate_container_ip_map needs docker client but since this
+        # runs inside docker itself, we need to add one separately.
+        subprocess.check_call(['generate_container_ip_map', '--help'])
+
 
     def test_synapse_services(self, setup):
         expected_services = [

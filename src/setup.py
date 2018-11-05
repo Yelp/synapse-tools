@@ -29,6 +29,7 @@ setup(
     entry_points={
         'console_scripts': [
             'configure_synapse=synapse_tools.configure_synapse:main',
+            'generate_container_ip_map=synapse_tools.generate_container_ip_map:main',
             'haproxy_synapse_reaper=synapse_tools.haproxy_synapse_reaper:main',
             'synapse_qdisc_tool=synapse_tools.haproxy.qdisc_tool:main',
         ],
