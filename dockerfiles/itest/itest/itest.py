@@ -102,6 +102,21 @@ YIELD_PARAMS = [
     for item in sublist
 ]
 
+MAP_FILE = '/var/run/synapse/maps/ip_to_service.map'
+
+INITIAL_MAP_FILE_CONTENTS = ''
+with open(MAP_FILE, 'r') as f:
+    INITIAL_MAP_FILE_CONTENTS = f.read()
+
+
+def reset_map_file():
+    """To avoid flakiness, reset the map file
+    before tests that depend on it.
+    """
+    with open(MAP_FILE, 'w+') as f:
+        f.seek(0)
+        f.write(INITIAL_MAP_FILE_CONTENTS)
+
 
 @pytest.yield_fixture(scope='class', params=YIELD_PARAMS)
 def setup(request):
@@ -484,6 +499,7 @@ class TestGroupTwo(object):
         from the maps file to simulate a call
         from an unknown service.
         """
+        reset_map_file()
         map_file = '/var/run/synapse/maps/ip_to_service.map'
         f = open(map_file, "r+")
         lines = f.readlines()
@@ -508,6 +524,31 @@ class TestGroupTwo(object):
                 urllib2.urlopen(request, timeout=SOCKET_TIMEOUT)) as page:
                 assert page.info().dict['x-smartstack-origin'] == '0'
 
+    def test_map_debug(self):
+        reset_map_file()
+        """We want to make sure that the process
+        to update the map every 5 seconds. For this,
+        we will add an entry to the map and see if it
+        is reflected in 5s.
+        """
+        test_ip = '169.254.255.254'
+        test_svc = 'new-service-just-added'
+        map_file = '/var/run/synapse/maps/ip_to_service.map'
+        f = open(map_file, 'a')
+        f.write('\n' + test_ip + ' ' + test_svc)
+        f.close()
+
+        time.sleep(5)
+
+        map_url = 'http://localhost:32124/'
+        request = urllib2.Request(url=map_url)
+        with contextlib.closing(
+                urllib2.urlopen(request, timeout=SOCKET_TIMEOUT)) as page:
+            raw = page.read()
+            svc_map = json.loads(raw)
+            assert test_ip in svc_map
+            assert svc_map[test_ip] == test_svc
+
 
 class TestGroupThree(object):
     @staticmethod
@@ -516,6 +557,7 @@ class TestGroupThree(object):
         on boxes (such as role::devbox) where the map file
         is not generated at all.
         """
+        reset_map_file()
         map_file = '/var/run/synapse/maps/ip_to_service.map'
         if os.path.isfile(map_file):
             os.remove(map_file)
@@ -531,5 +573,5 @@ class TestGroupThree(object):
             # First, test with the service IP present in the map file
             request = urllib2.Request(url=url, headers={'X-Smartstack-Origin': 'Spoof-Value'})
             with contextlib.closing(
-                urllib2.urlopen(request, timeout=SOCKET_TIMEOUT)) as page:
+                    urllib2.urlopen(request, timeout=SOCKET_TIMEOUT)) as page:
                 assert page.info().dict['x-smartstack-origin'] == '0'
