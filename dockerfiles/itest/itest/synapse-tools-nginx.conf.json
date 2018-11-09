@@ -6,5 +6,7 @@
   "listen_with_haproxy": false,
   "listen_with_nginx": true,
   "haproxy_restart_interval_s": 2,
-  "nginx_restart_interval_s": 2
+  "nginx_restart_interval_s": 2,
+  "enable_map_debug": true,
+  "map_debug_port": 32124
 }
