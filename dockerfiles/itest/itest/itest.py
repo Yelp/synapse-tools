@@ -568,5 +568,5 @@ class TestGroupThree(object):
             # First, test with the service IP present in the map file
             request = urllib2.Request(url=url, headers={'X-Smartstack-Origin': 'Spoof-Value'})
             with contextlib.closing(
-                    urllib2.urlopen(request, timeout=SOCKET_TIMEOUT)) as page:
+                urllib2.urlopen(request, timeout=SOCKET_TIMEOUT)) as page:
                 assert page.info().dict['x-smartstack-origin'] == '0'
