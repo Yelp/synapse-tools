@@ -21,10 +21,6 @@ end
 -- as it does not have a programmatic interface to update
 -- it, which is something we do in core.register_task
 function refresh_map()
-  if map_disabled == true then
-    return
-  end
-
   local f = io.open(map_file)
   local tmp_map = {}
   if f ~= nil then
@@ -53,14 +49,27 @@ core.register_init(function()
   xpcall(refresh_map, log_error)
 end)
 
--- This will register a task, to refresh the ip_to_svc map,
--- to run every 5 seconds
-core.register_task(function()
-  while true do
-    xpcall(refresh_map, log_error)
-    core.sleep(refresh_interval)
-  end
-end)
+if map_disabled ~= true then
+  -- This will register a task, to refresh the ip_to_svc map,
+  -- to run every 5 seconds
+  core.register_task(function()
+    while true do
+      xpcall(refresh_map, log_error)
+      core.sleep(refresh_interval)
+    end
+  end)
+
+  -- Debug endpoint for map file: this is config driven
+  -- and is currently enabled for only itests
+  core.register_service("map-debug", "http", function(applet)
+    local response = dump(svc_map)
+    applet:set_status(200)
+    applet:add_header("content-length", string.len(response))
+    applet:add_header("content-type", "text/plain")
+    applet:start_response()
+    applet:send(response)
+  end)
+end
 
 -- Add source header to the request
 function add_source_header(txn)
@@ -98,14 +107,3 @@ function dump(o)
   end
   return s .. '}'
 end
-
--- Debug endpoint for map file: this is config driven
--- and is currently enabled for only itests
-core.register_service("map-debug", "http", function(applet)
-  local response = dump(svc_map)
-  applet:set_status(200)
-  applet:add_header("content-length", string.len(response))
-  applet:add_header("content-type", "application/text")
-  applet:start_response()
-  applet:send(response)
-end)
