@@ -1,6 +1,7 @@
 svc_map = {}
 map_file = nil
 refresh_interval = nil
+map_disabled = false
 
 -- Splits the given string on spaces
 function split(s)
@@ -12,7 +13,7 @@ function split(s)
 end
 
 function log_error(err)
-  core.log(core.err, err)
+  core.log(core.err, '[add_source_header.lua]: ' .. err)
 end
 
 -- Loads the map from the disk:
@@ -20,6 +21,10 @@ end
 -- as it does not have a programmatic interface to update
 -- it, which is something we do in core.register_task
 function refresh_map()
+  if map_disabled == true then
+    return
+  end
+
   local f = io.open(map_file)
   local tmp_map = {}
   if f ~= nil then
@@ -34,6 +39,7 @@ end
 function init_vars()
   map_file = os.getenv('map_file')
   if map_file == nil then
+     map_disabled = true
      log_error('map_file variable not set! This will cause authentication to fail for some requests.')
    end
 
@@ -72,9 +78,7 @@ function add_source_header(txn)
     ip = 'nil'
   end
 
-  -- src_svc = map:lookup(ip)
   src_svc = svc_map[ip]
-  assert(src_svc == svc_map[ip], 'Problems with the hood')
   if src_svc == nil then
     src_svc = '0'
   end
@@ -101,7 +105,7 @@ core.register_service("map-debug", "http", function(applet)
   local response = dump(svc_map)
   applet:set_status(200)
   applet:add_header("content-length", string.len(response))
-  applet:add_header("content-type", "application/json")
+  applet:add_header("content-type", "application/text")
   applet:start_response()
   applet:send(response)
 end)
