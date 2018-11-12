@@ -1,4 +1,5 @@
 argparse==1.2.1
+dulwich==0.19.5
 environment_tools==1.1.0
 plumbum==1.6.0
 psutil==2.1.1

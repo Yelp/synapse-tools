@@ -256,6 +256,13 @@ def _generate_haproxy_top_level(synapse_tools_config):
         }
     }
 
+    # Add a map-debug endpoint if it is enabled in the configs (typically, only for itest)
+    if synapse_tools_config.get('enable_map_debug', False):
+        top_level['extra_sections']['listen map.debug'] = [
+            'bind :%d' % synapse_tools_config['map_debug_port'],
+            'http-request use-service lua.map-debug',
+        ]
+
     # Add the ip_to_svc.map as a haproxy top-level map_file environment variable
     map_dir = synapse_tools_config['map_dir']
     map_file = os.path.join(map_dir, 'ip_to_service.map')
