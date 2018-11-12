@@ -1,3 +1,9 @@
+synapse-tools (0.13.28) lucid; urgency=medium
+
+  * Update add_source_header to refresh map out-of-band
+
+ -- Avadhut Phatarpeakr <avadhutp@yelp.com>  Mon, 12 Nov 2018 16:05:35 -0700
+
 synapse-tools (0.13.27) lucid; urgency=medium
 
   * Implement determinisitic hashing in python 3
