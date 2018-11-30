@@ -1,11 +1,22 @@
 import os
+from typing import Iterable
+
 from synapse_tools.config_plugins.base import HAProxyConfigPlugin
+from synapse_tools.config_plugins.base import ServiceInfo
+from synapse_tools.config_plugins.base import SynapseToolsConfig
 
 
 class Logging(HAProxyConfigPlugin):
-    def __init__(self, service_name, service_info, synapse_tools_config):
+    def __init__(
+        self,
+        service_name: str,
+        service_info: ServiceInfo,
+        synapse_tools_config: SynapseToolsConfig,
+    ) -> None:
         super(Logging, self).__init__(
-            service_name, service_info, synapse_tools_config
+            service_name=service_name,
+            service_info=service_info,
+            synapse_tools_config=synapse_tools_config,
         )
 
         global_enabled = self.synapse_tools_config.get('logging', {}).get('enabled', False)
@@ -18,7 +29,7 @@ class Logging(HAProxyConfigPlugin):
             else {}
         )
 
-    def global_options(self):
+    def global_options(self) -> Iterable[str]:
         if not self.enabled:
             return []
 
@@ -32,13 +43,13 @@ class Logging(HAProxyConfigPlugin):
             opts.append('setenv sample_rate {0}'.format(sample_rate))
         return opts
 
-    def defaults_options(self):
+    def defaults_options(self) -> Iterable[str]:
         return []
 
-    def frontend_options(self):
+    def frontend_options(self) -> Iterable[str]:
         return []
 
-    def backend_options(self):
+    def backend_options(self) -> Iterable[str]:
         if not self.enabled:
             return []
         return [

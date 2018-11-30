@@ -10,6 +10,14 @@ import shutil
 import socket
 import subprocess
 import tempfile
+from typing import cast
+from typing import Dict
+from typing import List
+from typing import Mapping
+from typing import Optional
+from typing import Tuple
+from typing import Iterable
+from mypy_extensions import TypedDict
 
 import yaml
 import synapse_tools
@@ -17,17 +25,125 @@ from environment_tools.type_utils import available_location_types
 from environment_tools.type_utils import compare_types
 from environment_tools.type_utils import get_current_location
 from paasta_tools.marathon_tools import get_all_namespaces
+from paasta_tools.long_running_service_tools import ServiceNamespaceConfig
+from synapse_tools.config_plugins.base import ServiceInfo
+from synapse_tools.config_plugins.base import SynapseToolsConfig
 from synapse_tools.config_plugins.registry import PLUGIN_REGISTRY
 from synapse_tools.haproxy_synapse_reaper import DEFAULT_REAP_AGE_S
-from yaml import CLoader
+from yaml import CLoader  # type: ignore
 
 
-def get_config(synapse_tools_config_path):
+class DiscoveryDict(TypedDict, total=False):
+    method: str
+    label_filters: Iterable[Mapping[str, str]]
+
+
+class DiscoveryDictZookeeper(DiscoveryDict, total=False):
+    path: str
+    hosts: Iterable[str]
+
+
+class NginxTopLevelConfig(TypedDict):
+    contexts: Mapping[str, Iterable[str]]
+    config_file_path: str
+    check_command: str
+    reload_command: str
+    start_command: str
+    do_writes: bool
+    do_reloads: bool
+    restart_interval: int
+    restart_jitter: float
+    listen_address: str
+
+
+HAProxyTopLevelConfigExtraSections = TypedDict(
+    'HAProxyTopLevelConfigExtraSections',
+    {
+        'listen stats': Iterable[str],
+        'listen map.debug': Iterable[str],
+    },
+    total=False,
+)
+
+
+HAProxyTopLevelConfig = TypedDict(
+    'HAProxyTopLevelConfig',
+    {
+        'bind_address': str,
+        'restart_interval': int,
+        'restart_jitter': float,
+        'state_file_path': str,
+        'state_file_ttl': int,
+        'reload_command': str,
+        'socket_file_path': str,
+        'config_file_path': str,
+        'do_writes': bool,
+        'do_reloads': bool,
+        'do_socket': bool,
+        'server_order_seed': int,
+        'global': List[str],
+        'defaults': List[str],
+        'extra_sections': HAProxyTopLevelConfigExtraSections,
+    },
+)
+
+
+class FileOutput(TypedDict):
+    output_directory: str
+
+
+class ServiceFileOutput(TypedDict):
+    disabled: bool
+
+
+class HAProxyServiceConfig(TypedDict, total=False):
+    disabled: bool
+    port: Optional[str]
+    frontend: List[str]
+    backend: List[str]
+    bind_address: str
+    backend_name: str
+    server_options: str
+    listen: Iterable[str]
+
+
+class NginxServiceConfig(TypedDict, total=False):
+    disabled: bool
+    listen_options: str
+    mode: str
+    port: int
+    server: List[str]
+
+
+class ServiceConfig(TypedDict, total=False):
+    haproxy: HAProxyServiceConfig
+    nginx: NginxServiceConfig
+    discovery: DiscoveryDict
+    default_servers: Iterable[Mapping[str, str]]
+    use_previous_backends: bool
+    file_output: ServiceFileOutput
+
+
+class BaseConfig(TypedDict, total=False):
+    nginx: NginxTopLevelConfig
+    haproxy: HAProxyTopLevelConfig
+    services: Dict[str, ServiceConfig]
+    file_output: FileOutput
+
+
+ServiceAcls = Iterable[str]
+
+
+def get_config(
+    synapse_tools_config_path: str,
+) -> SynapseToolsConfig:
     with open(synapse_tools_config_path) as synapse_config:
         return set_defaults(json.load(synapse_config))
 
 
-def set_defaults(config):
+def set_defaults(
+    config: SynapseToolsConfig,
+) -> SynapseToolsConfig:
     # Backwards compatibility for haproxy_reload_cmd_fmt
     if 'reload_cmd_fmt' in config:
         config['haproxy_reload_cmd_fmt'] = config['reload_cmd_fmt']
@@ -89,12 +205,14 @@ def set_defaults(config):
     ]
 
     for k, v in defaults:
-        config.setdefault(k, v)
+        config.setdefault(k, v)  # type: ignore
 
     return config
 
 
-def get_zookeeper_topology(zookeeper_topology_path):
+def get_zookeeper_topology(
+    zookeeper_topology_path: str,
+) -> Iterable[str]:
     with open(zookeeper_topology_path) as fp:
         zookeeper_topology = yaml.load(fp, Loader=CLoader)
     zookeeper_topology = [
@@ -102,7 +220,9 @@ def get_zookeeper_topology(zookeeper_topology_path):
     return zookeeper_topology
 
 
-def _generate_nginx_top_level(synapse_tools_config):
+def _generate_nginx_top_level(
+    synapse_tools_config: SynapseToolsConfig,
+) -> NginxTopLevelConfig:
     return {
         'contexts': {
             'main': [
@@ -142,16 +262,18 @@ def _generate_nginx_top_level(synapse_tools_config):
     }
 
 
-def _generate_server_order_seed():
+def _generate_server_order_seed() -> int:
     return int(
         (hashlib.md5(socket.gethostname().encode('utf-8'))).hexdigest(),
         16
     )
 
 
-def _generate_haproxy_top_level(synapse_tools_config):
+def _generate_haproxy_top_level(
+    synapse_tools_config: SynapseToolsConfig,
+) -> HAProxyTopLevelConfig:
     haproxy_inter = synapse_tools_config['haproxy.defaults.inter']
-    top_level = {
+    top_level: HAProxyTopLevelConfig = {
         'bind_address': synapse_tools_config['bind_addr'],
         'restart_interval': synapse_tools_config['haproxy_restart_interval_s'],
         'restart_jitter': 0.1,
@@ -288,9 +410,11 @@ def _generate_haproxy_top_level(synapse_tools_config):
     return top_level
 
 
-def generate_base_config(synapse_tools_config):
+def generate_base_config(
+    synapse_tools_config: SynapseToolsConfig,
+) -> BaseConfig:
     synapse_tools_config = synapse_tools_config
-    base_config = {
+    base_config: BaseConfig = {
         # We'll fill this section in
         'services': {},
         'file_output': {'output_directory': synapse_tools_config['file_output_path']},
@@ -323,26 +447,38 @@ def generate_base_config(synapse_tools_config):
     return base_config
 
 
-def get_backend_name(service_name, discover_type, advertise_type):
+def get_backend_name(
+    service_name: str,
+    discover_type: str,
+    advertise_type: str,
+) -> str:
     if advertise_type == discover_type:
         return service_name
     else:
         return '%s.%s' % (service_name, advertise_type)
 
 
-def _get_socket_path(synapse_tools_config, service_name, proxy_proto=False):
+def _get_socket_path(
+    synapse_tools_config: SynapseToolsConfig,
+    service_name: str,
+    proxy_proto: bool = False,
+) -> str:
     if proxy_proto:
-        socket_fmt_option = 'haproxy_service_proxy_sockets_path_fmt'
+        socket_fmt_option = synapse_tools_config['haproxy_service_proxy_sockets_path_fmt']
     else:
-        socket_fmt_option = 'haproxy_service_sockets_path_fmt'
+        socket_fmt_option = synapse_tools_config['haproxy_service_sockets_path_fmt']
 
-    socket_path = synapse_tools_config[socket_fmt_option].format(
+    socket_path = socket_fmt_option.format(
         service_name=service_name
     )
     return socket_path
 
 
-def generate_acls_for_service(service_name, discover_type, advertise_types):
+def generate_acls_for_service(
+    service_name: str,
+    discover_type: str,
+    advertise_types: Iterable[str],
+) -> ServiceAcls:
     frontend_acl_configs = []
 
     for advertise_type in advertise_types:
@@ -370,7 +506,11 @@ def generate_acls_for_service(service_name, discover_type, advertise_types):
     return frontend_acl_configs
 
 
-def generate_configuration(synapse_tools_config, zookeeper_topology, services):
+def generate_configuration(
+    synapse_tools_config: SynapseToolsConfig,
+    zookeeper_topology: Iterable[str],
+    services: Iterable[Tuple[str, ServiceNamespaceConfig]],
+) -> BaseConfig:
     synapse_config = generate_base_config(synapse_tools_config)
     available_locations = available_location_types()
     location_depth_mapping = {
@@ -405,7 +545,7 @@ def generate_configuration(synapse_tools_config, zookeeper_topology, services):
 
         base_watcher_cfg = base_watcher_cfg_for_service(
             service_name=service_name,
-            service_info=service_info,
+            service_info=cast(ServiceInfo, service_info),
             zookeeper_topology=zookeeper_topology,
             synapse_tools_config=synapse_tools_config,
         )
@@ -461,7 +601,7 @@ def generate_configuration(synapse_tools_config, zookeeper_topology, services):
                     # The backend only watchers don't need frontend
                     # because they have no listen port, so Synapse doens't
                     # generate a frontend section for them at all
-                    del config['haproxy']['frontend']
+                    del config['haproxy']['frontend']  # type: ignore
                 config['haproxy']['backend_name'] = backend_identifier
 
             synapse_config['services'][backend_identifier] = config
@@ -474,16 +614,18 @@ def generate_configuration(synapse_tools_config, zookeeper_topology, services):
                 listener_name = '{0}.nginx_listener'.format(service_name)
                 synapse_config['services'][listener_name] = (
                     _generate_nginx_for_watcher(
-                        service_name, service_info, synapse_tools_config
+                        service_name=service_name,
+                        service_info=cast(ServiceInfo, service_info),
+                        synapse_tools_config=synapse_tools_config,
                     )
                 )
 
             # Add HAProxy options for plugins
             for plugin_name in PLUGIN_REGISTRY:
                 plugin_instance = PLUGIN_REGISTRY[plugin_name](
-                    service_name,
-                    service_info,
-                    synapse_tools_config
+                    service_name=service_name,
+                    service_info=cast(ServiceInfo, service_info),
+                    synapse_tools_config=synapse_tools_config,
                 )
                 config_to_opts = [
                     (synapse_config['services'][service_name]['haproxy']['frontend'],
@@ -495,12 +637,12 @@ def generate_configuration(synapse_tools_config, zookeeper_topology, services):
                     (synapse_config['haproxy']['defaults'],
                      plugin_instance.defaults_options(), plugin_instance.prepend_options('defaults'))
                 ]
-                for (config, opts, prepend_options) in config_to_opts:
-                    options = [x for x in opts if x not in config]
+                for (cfg, opts, prepend_options) in config_to_opts:
+                    options = [x for x in opts if x not in cfg]
                     if prepend_options:
-                        config[0:0] += options
+                        cfg[0:0] += options
                     else:
-                        config.extend(options)
+                        cfg.extend(options)
 
             # TODO(jlynch|2017-08-15): move this to a plugin!
             # populate the ACLs to route to the service backends, this must
@@ -516,12 +658,17 @@ def generate_configuration(synapse_tools_config, zookeeper_topology, services):
     return synapse_config
 
 
-def base_watcher_cfg_for_service(service_name, service_info, zookeeper_topology, synapse_tools_config):
-    discovery = {
+def base_watcher_cfg_for_service(
+    service_name: str,
+    service_info: ServiceInfo,
+    zookeeper_topology: Iterable[str],
+    synapse_tools_config: SynapseToolsConfig,
+) -> ServiceConfig:
+    discovery: DiscoveryDict = DiscoveryDictZookeeper({
         'method': 'zookeeper',
         'path': '/smartstack/global/%s' % service_name,
         'hosts': zookeeper_topology,
-    }
+    })
 
     haproxy = _generate_haproxy_for_watcher(
         service_name, service_info, synapse_tools_config
@@ -533,7 +680,7 @@ def base_watcher_cfg_for_service(service_name, service_info, zookeeper_topology,
         haproxy['frontend'].extend(frontend_chaos)
 
     # Now write the actual synapse service entry
-    service = {
+    service: ServiceConfig = {
         'default_servers': [],
         # See SRV-1190
         'use_previous_backends': False,
@@ -551,7 +698,9 @@ def base_watcher_cfg_for_service(service_name, service_info, zookeeper_topology,
     return service
 
 
-def _generate_captured_request_headers(synapse_tools_config):
+def _generate_captured_request_headers(
+    synapse_tools_config: SynapseToolsConfig,
+) -> Iterable[str]:
     header_pairs = [
         pair.strip().partition(":") for pair in
         synapse_tools_config['haproxy_captured_req_headers'].split(',')
@@ -561,7 +710,9 @@ def _generate_captured_request_headers(synapse_tools_config):
     return headers
 
 
-def _get_default_timeout(service_info):
+def _get_default_timeout(
+    service_info: ServiceInfo,
+) -> Optional[int]:
     timeout_client_ms = service_info.get('timeout_client_ms')
     timeout_server_ms = service_info.get('timeout_server_ms')
 
@@ -574,7 +725,11 @@ def _get_default_timeout(service_info):
     )
 
 
-def _generate_haproxy_for_watcher(service_name, service_info, synapse_tools_config):
+def _generate_haproxy_for_watcher(
+    service_name: str,
+    service_info: ServiceInfo,
+    synapse_tools_config: SynapseToolsConfig,
+) -> HAProxyServiceConfig:
     # Note that validations of all the following config options are done in
     # config post-receive so invalid config should never get here
 
@@ -694,7 +849,11 @@ def _generate_haproxy_for_watcher(service_name, service_info, synapse_tools_conf
     }
 
 
-def _generate_nginx_for_watcher(service_name, service_info, synapse_tools_config):
+def _generate_nginx_for_watcher(
+    service_name: str,
+    service_info: ServiceInfo,
+    synapse_tools_config: SynapseToolsConfig,
+) -> ServiceConfig:
     socket_path = _get_socket_path(
         synapse_tools_config,
         service_name,
@@ -714,7 +873,7 @@ def _generate_nginx_for_watcher(service_name, service_info, synapse_tools_config
 
     # All we want from nginx is TCP termination, no http even for
     # http services. HAProxy is responsible for all layer7 choices
-    nginx_config = {
+    nginx_config: NginxServiceConfig = {
         'mode': 'tcp',
         'port': service_info['proxy_port'],
         'server': server,
@@ -731,7 +890,7 @@ def _generate_nginx_for_watcher(service_name, service_info, synapse_tools_config
     if both_listen:
         nginx_config['listen_options'] = 'reuseport'
 
-    service = {
+    service: ServiceConfig = {
         'default_servers': [
             {'host': 'unix', 'port': socket_path}
         ],
@@ -750,7 +909,10 @@ def _generate_nginx_for_watcher(service_name, service_info, synapse_tools_config
     return service
 
 
-def chaos_options(chaos_dict, discovery_dict):
+def chaos_options(
+    chaos_dict: Mapping[str, Mapping[str, Mapping[str, str]]],
+    discovery_dict: DiscoveryDict,
+) -> Tuple[Iterable[str], DiscoveryDict]:
     """ Return a tuple of
     (additional_frontend_options, replacement_discovery_dict) """
 
@@ -776,7 +938,9 @@ def chaos_options(chaos_dict, discovery_dict):
     return [], discovery_dict
 
 
-def merge_dict_for_my_grouping(chaos_dict):
+def merge_dict_for_my_grouping(
+    chaos_dict: Mapping[str, Mapping[str, Mapping[str, str]]],
+) -> Mapping[str, str]:
     """ Given a dictionary where the top-level keys are
     groupings (ecosystem, habitat, etc), merge the subdictionaries
     whose values match the grouping that this host is in.
@@ -794,7 +958,7 @@ def merge_dict_for_my_grouping(chaos_dict):
     for a host in sfo2/prod, would return
         {'some_key': some_value, 'another_key': another_value}
     """
-    result = {}
+    result: Dict[str, str] = {}
     for grouping_type, grouping_dict in chaos_dict.items():
         my_grouping = get_my_grouping(grouping_type)
         entry = grouping_dict.get(my_grouping, {})
@@ -802,12 +966,12 @@ def merge_dict_for_my_grouping(chaos_dict):
     return result
 
 
-def get_my_grouping(grouping_type):
+def get_my_grouping(grouping_type: str) -> str:
     with open('/nail/etc/{0}'.format(grouping_type)) as fd:
         return fd.read().strip()
 
 
-def main():
+def main() -> None:
     my_config = get_config(
         os.environ.get(
             'SYNAPSE_TOOLS_CONFIG_PATH', '/etc/synapse/synapse-tools.conf.json'
@@ -818,7 +982,8 @@ def main():
         my_config,
         get_zookeeper_topology(
             my_config['zookeeper_topology_path']
-        ), get_all_namespaces()
+        ),
+        get_all_namespaces(),
     )
 
     with tempfile.NamedTemporaryFile() as tmp_file:

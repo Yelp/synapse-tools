@@ -2,14 +2,21 @@
 import argparse
 import os
 import socket
+from typing import Iterable
+from typing import Optional
+from typing import Mapping
+from typing import Tuple
 
 from paasta_tools.utils import atomic_file_write
+from paasta_tools.utils import Client
 from paasta_tools.utils import get_docker_client
 
 HAPROXY_STATS_SOCKET = '/var/run/synapse/haproxy.sock'
 
 
-def get_prev_file_contents(filename):
+def get_prev_file_contents(
+    filename: str,
+) -> Mapping[str, str]:
     if os.path.isfile(filename):
         with open(filename, 'r') as fp:
             prev_lines = [
@@ -23,7 +30,9 @@ def get_prev_file_contents(filename):
     return {}
 
 
-def extract_taskid_and_ip(docker_client):
+def extract_taskid_and_ip(
+    docker_client: Client,
+) -> Iterable[Tuple[str, str]]:
     service_ips_and_ids = []
     for container in docker_client.containers():
         networks = container['NetworkSettings']['Networks']
@@ -48,7 +57,10 @@ def extract_taskid_and_ip(docker_client):
     return service_ips_and_ids
 
 
-def send_to_haproxy(command, timeout):
+def send_to_haproxy(
+    command: str,
+    timeout: int,
+) -> None:
     s = socket.socket(socket.AF_UNIX)
     s.settimeout(timeout)
     s.connect(HAPROXY_STATS_SOCKET)
@@ -57,16 +69,17 @@ def send_to_haproxy(command, timeout):
 
 
 def update_haproxy_mapping(
-    ip_addr,
-    task_id,
-    prev_ip_to_task_id,
-    filename,
-    timeout,
-):
+    ip_addr: str,
+    task_id: str,
+    prev_ip_to_task_id: Mapping[str, str],
+    filename: str,
+    timeout: int,
+) -> None:
     # Check if this IP was in the file previously, if so, we want
     # to send an update to the HAProxy map instead of adding a new
     # entry (new additions to the map don't overwrite old entries
     # and instead create duplicate keys with different values).
+    method: Optional[str]
     if ip_addr in prev_ip_to_task_id:
         if prev_ip_to_task_id[ip_addr] != task_id:
             method = 'set'
@@ -85,7 +98,12 @@ def update_haproxy_mapping(
         ), timeout)
 
 
-def remove_stopped_container_entries(prev_ips, curr_ips, filename, timeout):
+def remove_stopped_container_entries(
+    prev_ips: Iterable[str],
+    curr_ips: Iterable[str],
+    filename: str,
+    timeout: int,
+) -> None:
     for ip in prev_ips:
         if ip not in curr_ips:
             send_to_haproxy('del map {} {}'.format(
@@ -94,7 +112,7 @@ def remove_stopped_container_entries(prev_ips, curr_ips, filename, timeout):
             ), timeout)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
             'Script to dump a HAProxy map between container IPs and task IDs.'

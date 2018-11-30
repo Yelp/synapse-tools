@@ -1,14 +1,16 @@
+from typing import Iterable
+
 from synapse_tools.config_plugins.base import HAProxyConfigPlugin
 
 
 class ProxiedThrough(HAProxyConfigPlugin):
-    def global_options(self):
+    def global_options(self) -> Iterable[str]:
         return []
 
-    def defaults_options(self):
+    def defaults_options(self) -> Iterable[str]:
         return []
 
-    def frontend_options(self):
+    def frontend_options(self) -> Iterable[str]:
         if self.service_info.get('proxied_through') is None:
             return []
 
@@ -33,7 +35,7 @@ class ProxiedThrough(HAProxyConfigPlugin):
             ),
         ]
 
-    def backend_options(self):
+    def backend_options(self) -> Iterable[str]:
         # We are not a proxy for someone else
         if not self.service_info.get('is_proxy', False):
             return []

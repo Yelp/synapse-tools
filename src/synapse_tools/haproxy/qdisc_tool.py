@@ -31,15 +31,21 @@ SOURCE_IP = '169.254.255.254'
 CONSOLE_FORMAT = '%(asctime)s - %(name)-12s: %(levelname)-8s %(message)s'
 
 
-def stat_cmd(args):
+def stat_cmd(
+    args: argparse.Namespace,
+) -> int:
     return stat(INTERFACE_NAME)
 
 
-def check_setup_cmd(args):
+def check_setup_cmd(
+    args: argparse.Namespace,
+) -> int:
     return check_setup(INTERFACE_NAME)
 
 
-def manage_plug_cmd(args):
+def manage_plug_cmd(
+    args: argparse.Namespace,
+) -> int:
     if args.action == 'plug':
         manage_plug(INTERFACE_NAME, enable_plug=True)
     elif args.action == 'unplug':
@@ -49,19 +55,25 @@ def manage_plug_cmd(args):
     return 0
 
 
-def needs_setup_cmd(args):
+def needs_setup_cmd(
+    args: argparse.Namespace,
+) -> int:
     return needs_setup(INTERFACE_NAME)
 
 
-def setup_cmd(args):
+def setup_cmd(
+    args: argparse.Namespace,
+) -> int:
     return setup(INTERFACE_NAME, SOURCE_IP)
 
 
-def clear_cmd(args):
+def clear_cmd(
+    args: argparse.Namespace,
+) -> int:
     return clear(INTERFACE_NAME, SOURCE_IP)
 
 
-def drop_perms():
+def drop_perms() -> None:
     user = getpwnam(os.environ.get('SUDO_USER', 'nobody'))
     uid = user.pw_uid
     gid = user.pw_gid
@@ -71,7 +83,9 @@ def drop_perms():
     os.setuid(uid)
 
 
-def protect_call_cmd(args):
+def protect_call_cmd(
+    args: argparse.Namespace,
+) -> int:
     if os.getuid() != 0:
         print('Only root can execute protected binaries')
         return 1
@@ -98,9 +112,10 @@ def protect_call_cmd(args):
                 break
             except Exception:
                 log.exception('Failed to disable plug, try #%d' % i)
+    return 0
 
 
-def parse_options():
+def parse_options() -> argparse.Namespace:
     parser = argparse.ArgumentParser(epilog=(
         'Setup QoS queueing disciplines for haproxy'
     ))
@@ -145,7 +160,9 @@ def parse_options():
     return parser.parse_args()
 
 
-def setup_logging(args):
+def setup_logging(
+    args: argparse.Namespace,
+) -> None:
     if args.verbose:
         level = logging.DEBUG
     else:
@@ -154,7 +171,7 @@ def setup_logging(args):
     logging.basicConfig(level=level, format=CONSOLE_FORMAT)
 
 
-def main():
+def main() -> None:
     args = parse_options()
     setup_logging(args)
     sys.exit(args.func(args))

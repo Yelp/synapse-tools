@@ -24,6 +24,8 @@ import logging
 import operator
 import os
 import time
+from typing import Iterator
+from typing import Iterable
 
 import argparse
 import psutil
@@ -44,7 +46,7 @@ LOG_FORMAT = '%(levelname)s %(message)s'
 log = logging.getLogger()
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--state-dir', default=DEFAULT_STATE_DIR,
                         help='State directory (default: %(default)s).')
@@ -57,12 +59,14 @@ def parse_args():
     return parser.parse_args()
 
 
-def get_main_pid():
+def get_main_pid() -> int:
     with open(HAPROXY_SYNAPSE_PIDFILE) as fh:
         return int(fh.readline().strip())
 
 
-def get_alumni(username):
+def get_alumni(
+    username: str,
+) -> Iterator[psutil.Process]:
     main_pid = get_main_pid()
 
     for proc in psutil.process_iter():
@@ -78,7 +82,12 @@ def get_alumni(username):
         yield proc
 
 
-def kill_alumni(alumni, state_dir, reap_age, max_procs):
+def kill_alumni(
+    alumni: Iterable[psutil.Process],
+    state_dir: str,
+    reap_age: int,
+    max_procs: int,
+) -> int:
     reap_count = 0
 
     # Sort by oldest process creation time (= youngest) first
@@ -111,7 +120,10 @@ def kill_alumni(alumni, state_dir, reap_age, max_procs):
     return reap_count
 
 
-def remove_stale_alumni_pidfiles(alumni, state_dir):
+def remove_stale_alumni_pidfiles(
+    alumni: Iterable[psutil.Process],
+    state_dir: str,
+) -> None:
     alumni_pids = [proc.pid for proc in alumni]
 
     for pidfile in os.listdir(state_dir):
@@ -128,7 +140,9 @@ def remove_stale_alumni_pidfiles(alumni, state_dir):
         os.remove(os.path.join(state_dir, pidfile))
 
 
-def ensure_path_exists(path):
+def ensure_path_exists(
+    path: str,
+) -> None:
     try:
         os.mkdir(path)
     except OSError as exception:
@@ -136,7 +150,7 @@ def ensure_path_exists(path):
             raise
 
 
-def main():
+def main() -> None:
     logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 
     args = parse_args()
