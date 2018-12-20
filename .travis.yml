@@ -1,16 +1,19 @@
 env:
   # Don't build for lucid because it is ancient and doesn't even have Python 2.7
-  - DIST=trusty
-  - DIST=xenial
+  - MAKE_TARGET=itest_trusty
+  - MAKE_TARGET=itest_xenial
+  - MAKE_TARGET=mypy
 branch:
   only:
     - master
 language: python
+python:
+  - "3.6"
 sudo: required
 services:
   - docker
 install: pip install tox
-script: "make itest_$DIST"
+script: "make $MAKE_TARGET"
 deploy:
   - provider: bintray
     file: "bintray.json"

@@ -21,3 +21,4 @@ src/debian/synapse-tools.postinst.debhelper
 src/.cache/
 bintray.json
 *.deb
+.mypy_cache/

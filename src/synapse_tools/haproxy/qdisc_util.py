@@ -22,7 +22,9 @@ from pyroute2.netlink.rtnl.tcmsg import tcmsg
 log = logging.getLogger(__name__)
 
 
-def stat(interface_name):
+def stat(
+    interface_name: str,
+) -> int:
     """ Show status of existing qdisc and iptables rules """
     for tc_type in ('qdisc', 'class', 'filter'):
         print('=' * 20 + ' tc {0} '.format(tc_type) + '=' * 20)
@@ -33,7 +35,9 @@ def stat(interface_name):
     return 0
 
 
-def check_setup(interface_name):
+def check_setup(
+    interface_name: str,
+) -> int:
     """ Checks the existing qdisc and iptables rules """
     tc_cmd = tc['-s', 'qdisc', 'show', 'dev', interface_name]
     tc_grep_cmd = grep['qdisc']
@@ -61,7 +65,9 @@ def check_setup(interface_name):
     return 0
 
 
-def needs_setup(interface_name):
+def needs_setup(
+    interface_name: str,
+) -> int:
     """ Checks if there are no existing qdisc and iptables rules """
     check_result = check_setup(interface_name)
     if check_result == 0:
@@ -98,7 +104,9 @@ PLUG_QDISC = '40:'
 IPTABLES_MARK = '1'
 
 
-def _apply_tc_rules(interface_name):
+def _apply_tc_rules(
+    interface_name: str,
+) -> None:
     log.info('Creating prio qdisc with a plug lane for {0}'.format(
         interface_name))
     tc['qdisc', 'add', 'dev', interface_name,
@@ -134,7 +142,9 @@ def _apply_tc_rules(interface_name):
     manage_plug(interface_name, enable_plug=False)
 
 
-def _apply_iptables_rule(source_ip):
+def _apply_iptables_rule(
+    source_ip: str,
+) -> None:
     log.info('Creating iptables rule to mark outgoing syns on {0}'.format(
         source_ip))
     iptables[
@@ -143,7 +153,10 @@ def _apply_iptables_rule(source_ip):
     ]()
 
 
-def setup(interface_name, source_ip):
+def setup(
+    interface_name: str,
+    source_ip: str,
+) -> int:
     """ Sets up qdisc and iptables rules on the provided devices
 
     This effectively creates a normal prio qdisc with an extra plug lane.
@@ -162,7 +175,10 @@ def setup(interface_name, source_ip):
     return 0
 
 
-def clear(interface_name, source_ip):
+def clear(
+    interface_name: str,
+    source_ip: str,
+) -> int:
     try:
         tc['qdisc', 'del', 'dev', interface_name, 'root']()
     except Exception:
@@ -178,9 +194,13 @@ def clear(interface_name, source_ip):
             ]()
         except Exception:
             break
+    return 0
 
 
-def _manage_plug_via_netlink(interface_name, action='unplug'):
+def _manage_plug_via_netlink(
+    interface_name: str,
+    action_name: str = 'unplug',
+) -> None:
     """ Manipulates the plug qdisc via netlink
 
     FIXME: Once we have a modern userpace, replace this with appropriate
@@ -193,7 +213,7 @@ def _manage_plug_via_netlink(interface_name, action='unplug'):
     # #define TCQ_PLUG_RELEASE_ONE           1
     # #define TCQ_PLUG_RELEASE_INDEFINITE    2
     # #define TCQ_PLUG_LIMIT                 3
-    action = {'unplug': 2, 'plug': 0}[action]
+    action = {'unplug': 2, 'plug': 0}[action_name]
     packet_limit = 10000
     handle = transform_handle(PLUG_QDISC)
     parent = transform_handle(PLUG_CLASS)
@@ -233,7 +253,10 @@ def _manage_plug_via_netlink(interface_name, action='unplug'):
                 nlm_response))
 
 
-def manage_plug(interface, enable_plug):
+def manage_plug(
+    interface: str,
+    enable_plug: bool,
+) -> int:
     """ Enable or disable traffic flowing through the plug lane
 
     Note that when enable_plug is True, traffic is queued, and when

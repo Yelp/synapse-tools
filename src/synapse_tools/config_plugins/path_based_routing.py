@@ -1,9 +1,18 @@
 import os
+from typing import Iterable
+
 from synapse_tools.config_plugins.base import HAProxyConfigPlugin
+from synapse_tools.config_plugins.base import ServiceInfo
+from synapse_tools.config_plugins.base import SynapseToolsConfig
 
 
 class PathBasedRouting(HAProxyConfigPlugin):
-    def __init__(self, service_name, service_info, synapse_tools_config):
+    def __init__(
+        self,
+        service_name: str,
+        service_info: ServiceInfo,
+        synapse_tools_config: SynapseToolsConfig,
+    ) -> None:
         super(PathBasedRouting, self).__init__(
             service_name, service_info, synapse_tools_config
         )
@@ -12,7 +21,7 @@ class PathBasedRouting(HAProxyConfigPlugin):
         svc_enabled = self.plugins.get('path_based_routing', {}).get('enabled', False)
         self.enabled = svc_enabled or global_enabled
 
-    def global_options(self):
+    def global_options(self) -> Iterable[str]:
         if not self.enabled:
             return []
 
@@ -20,10 +29,10 @@ class PathBasedRouting(HAProxyConfigPlugin):
         file_path = os.path.join(lua_dir, 'path_based_routing.lua')
         return ['lua-load %s' % file_path]
 
-    def defaults_options(self):
+    def defaults_options(self) -> Iterable[str]:
         return []
 
-    def frontend_options(self):
+    def frontend_options(self) -> Iterable[str]:
         if not self.enabled:
             return []
 
@@ -32,5 +41,5 @@ class PathBasedRouting(HAProxyConfigPlugin):
             'use_backend %[var(txn.backend_name)]'
         ]
 
-    def backend_options(self):
+    def backend_options(self) -> Iterable[str]:
         return []
