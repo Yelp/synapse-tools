@@ -54,6 +54,8 @@ class NginxTopLevelConfig(TypedDict):
     restart_interval: int
     restart_jitter: float
     listen_address: str
+    log_error_target: str
+    log_error_level: str
 
 
 HAProxyTopLevelConfigExtraSections = TypedDict(
@@ -202,6 +204,8 @@ def set_defaults(
         # (aka services) This should be relatively rare so we crank up the
         # restart_interval to limit memory consumption.
         ('nginx_restart_interval_s', 600),
+        ('nginx_log_error_target', '/dev/null'),
+        ('nginx_log_error_level', 'crit'),
     ]
 
     for k, v in defaults:
@@ -231,7 +235,10 @@ def _generate_nginx_top_level(
                     int(synapse_tools_config['maximum_connections']) * 4
                 ),
                 'pid {0}'.format(synapse_tools_config['nginx_pid_file_path']),
-                'error_log /dev/null crit',
+                'error_log {0} {1}'.format(
+                    synapse_tools_config['nginx_log_error_target'],
+                    synapse_tools_config['nginx_log_error_level']
+                ),
             ],
             'stream': [
                 'tcp_nodelay on'
