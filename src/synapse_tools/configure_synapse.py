@@ -54,8 +54,6 @@ class NginxTopLevelConfig(TypedDict):
     restart_interval: int
     restart_jitter: float
     listen_address: str
-    log_error_target: str
-    log_error_level: str
 
 
 HAProxyTopLevelConfigExtraSections = TypedDict(
