@@ -3,7 +3,7 @@ dulwich==0.19.5
 environment_tools==1.1.0
 plumbum==1.6.0
 psutil==2.1.1
-PyYAML==4.2b1
+PyYAML==3.11
 pyroute2==0.3.4
 paasta-tools==0.81.26
 setuptools==37.0.0
