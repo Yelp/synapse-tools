@@ -1,3 +1,9 @@
+synapse-tools (0.13.29) lucid; urgency=medium
+
+  * Add possibility to enable error logging in nginx
+
+ -- Mathieu Frappier <mathieu@yelp.com>  Wed, 09 Jan 2019 10:15:35 -0700
+
 synapse-tools (0.13.28) lucid; urgency=medium
 
   * Update add_source_header to refresh map out-of-band
