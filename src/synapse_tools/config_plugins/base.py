@@ -88,6 +88,8 @@ SynapseToolsConfig = TypedDict(
         'nginx_reload_cmd_fmt': str,
         'nginx_start_cmd_fmt': str,
         'nginx_restart_interval_s': int,
+        'nginx_log_error_target': str,
+        'nginx_log_error_level': str,
     },
 )
 
