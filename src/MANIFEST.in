@@ -1,2 +1,3 @@
 include synapse_tools/lua_scripts/*.lua
 include synapse_tools/py.typed
+include requirements.txt

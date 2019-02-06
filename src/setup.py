@@ -1,7 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from pkg_resources import yield_lines
 from setuptools import setup, find_packages
+
+
+def get_install_requires():
+    with open('requirements.txt', 'r') as f:
+        minimal_reqs = list(yield_lines(f.read()))
+
+    return minimal_reqs
+
 
 setup(
     name='synapse-tools',
@@ -13,19 +22,7 @@ setup(
     packages=find_packages(exclude=['tests']),
     setup_requires=['setuptools'],
     include_package_data=True,
-    install_requires=[
-        # paasta tools pins this so we really can't have anything higher
-        # if paasta tools ever does a >= we can relax this constraint
-        'argparse==1.2.1',
-        'environment_tools>=1.1.0,<1.2.0',
-        'plumbum>=1.6.0,<1.7.0',
-        'protobuf==2.6.1',
-        'psutil>=2.1.1,<2.2.0',
-        'PyYAML>=3.11,<4.0.0',
-        'pyroute2>=0.3.4,<0.4.0',
-        'paasta-tools==0.81.26',
-        'setuptools==37.0.0',
-    ],
+    install_requires=get_install_requires(),
     entry_points={
         'console_scripts': [
             'configure_synapse=synapse_tools.configure_synapse:main',
