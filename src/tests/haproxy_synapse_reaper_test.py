@@ -6,7 +6,7 @@ from synapse_tools import haproxy_synapse_reaper
 def test_parse_args():
     mock_argv = ['haproxy_synapse_reaper']
     with mock.patch('sys.argv', mock_argv):
-            args = haproxy_synapse_reaper.parse_args()
+        args = haproxy_synapse_reaper.parse_args()
 
     assert args.state_dir == '/var/run/synapse_alumni'
     assert args.reap_age == 3600
@@ -16,7 +16,7 @@ def test_parse_args():
 def test_parse_args_state_dir():
     mock_argv = ['haproxy_synapse_reaper', '--state-dir', 'foo']
     with mock.patch('sys.argv', mock_argv):
-            args = haproxy_synapse_reaper.parse_args()
+        args = haproxy_synapse_reaper.parse_args()
 
     assert args.state_dir == 'foo'
 
@@ -24,7 +24,7 @@ def test_parse_args_state_dir():
 def test_parse_args_reap_age():
     mock_argv = ['haproxy_synapse_reaper', '--reap-age', '42']
     with mock.patch('sys.argv', mock_argv):
-            args = haproxy_synapse_reaper.parse_args()
+        args = haproxy_synapse_reaper.parse_args()
 
     assert args.reap_age == 42
 
@@ -32,7 +32,7 @@ def test_parse_args_reap_age():
 def test_parse_args_username():
     mock_argv = ['haproxy_synapse_reaper', '--username', 'bar']
     with mock.patch('sys.argv', mock_argv):
-            args = haproxy_synapse_reaper.parse_args()
+        args = haproxy_synapse_reaper.parse_args()
 
     assert args.username == 'bar'
 
