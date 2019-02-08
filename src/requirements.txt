@@ -6,6 +6,7 @@ psutil==2.1.1
 PyYAML==3.11
 pyroute2==0.3.4
 paasta-tools==0.81.26
+protobuf==2.6.1
 setuptools==37.0.0
 tox-pip-extensions==1.1.0
 backports.functools_lru_cache==1.2.1

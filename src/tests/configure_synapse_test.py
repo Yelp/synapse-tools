@@ -143,7 +143,7 @@ def test_generate_configuration(mock_get_current_location, mock_available_locati
                 'backend': [
                     'balance roundrobin',
                     'reqidel ^X-Mode:.*',
-                    'reqadd X-Mode:\ ro',
+                    'reqadd X-Mode:\\ ro',
                     'option httpchk GET /http/test_service/0/status HTTP/1.1\\r\\nX-Mode:\\ ro',
                     'http-check send-state',
                     'retries 2',
@@ -177,7 +177,7 @@ def test_generate_configuration(mock_get_current_location, mock_available_locati
                 'backend': [
                     'balance roundrobin',
                     'reqidel ^X-Mode:.*',
-                    'reqadd X-Mode:\ ro',
+                    'reqadd X-Mode:\\ ro',
                     'option httpchk GET /http/test_service/0/status HTTP/1.1\\r\\nX-Mode:\\ ro',
                     'http-check send-state',
                     'retries 2',
@@ -308,7 +308,7 @@ def test_generate_configuration_single_advertise(mock_get_current_location, mock
                 'backend': [
                     'balance roundrobin',
                     'reqidel ^X-Mode:.*',
-                    'reqadd X-Mode:\ ro',
+                    'reqadd X-Mode:\\ ro',
                     'option httpchk GET /http/test_service/0/status HTTP/1.1\\r\\nX-Mode:\\ ro',
                     'http-check send-state',
                     'retries 3',
@@ -468,7 +468,7 @@ def test_generate_configuration_with_proxied_through(mock_get_current_location, 
                 'backend': [
                     'balance roundrobin',
                     'reqidel ^X-Mode:.*',
-                    'reqadd X-Mode:\ ro',
+                    'reqadd X-Mode:\\ ro',
                     'option httpchk GET /http/test_service/0/status HTTP/1.1\\r\\nX-Mode:\\ ro',
                     'http-check send-state',
                     'retries 2',
@@ -561,7 +561,7 @@ def test_generate_configuration_with_nginx(mock_get_current_location, mock_avail
                 'backend': [
                     'balance roundrobin',
                     'reqidel ^X-Mode:.*',
-                    'reqadd X-Mode:\ ro',
+                    'reqadd X-Mode:\\ ro',
                     'option httpchk GET /http/test_service/0/status HTTP/1.1\\r\\nX-Mode:\\ ro',
                     'http-check send-state',
                     'retries 2',
@@ -598,7 +598,7 @@ def test_generate_configuration_with_nginx(mock_get_current_location, mock_avail
                 'backend': [
                     'balance roundrobin',
                     'reqidel ^X-Mode:.*',
-                    'reqadd X-Mode:\ ro',
+                    'reqadd X-Mode:\\ ro',
                     'option httpchk GET /http/test_service/0/status HTTP/1.1\\r\\nX-Mode:\\ ro',
                     'http-check send-state',
                     'retries 2',
@@ -709,7 +709,7 @@ def test_generate_configuration_only_nginx(mock_get_current_location, mock_avail
                 'backend': [
                     'balance roundrobin',
                     'reqidel ^X-Mode:.*',
-                    'reqadd X-Mode:\ ro',
+                    'reqadd X-Mode:\\ ro',
                     'option httpchk GET /http/test_service/0/status HTTP/1.1\\r\\nX-Mode:\\ ro',
                     'http-check send-state',
                     'retries 2',
@@ -747,7 +747,7 @@ def test_generate_configuration_only_nginx(mock_get_current_location, mock_avail
                 'backend': [
                     'balance roundrobin',
                     'reqidel ^X-Mode:.*',
-                    'reqadd X-Mode:\ ro',
+                    'reqadd X-Mode:\\ ro',
                     'option httpchk GET /http/test_service/0/status HTTP/1.1\\r\\nX-Mode:\\ ro',
                     'http-check send-state',
                     'retries 2',
@@ -857,7 +857,7 @@ def test_generate_configuration_with_source_required_plugin(mock_get_current_loc
                     'http-request lua.add_source_header',
                     'balance roundrobin',
                     'reqidel ^X-Mode:.*',
-                    'reqadd X-Mode:\ ro',
+                    'reqadd X-Mode:\\ ro',
                     'option httpchk GET /http/test_service/0/status HTTP/1.1\\r\\nX-Mode:\\ ro',
                     'http-check send-state',
                     'retries 2',
@@ -1018,7 +1018,7 @@ def test_generate_configuration_with_logging_plugin(mock_get_current_location, m
                 'backend': [
                     'balance roundrobin',
                     'reqidel ^X-Mode:.*',
-                    'reqadd X-Mode:\ ro',
+                    'reqadd X-Mode:\\ ro',
                     'option httpchk GET /http/test_service/0/status HTTP/1.1\\r\\nX-Mode:\\ ro',
                     'http-check send-state',
                     'retries 2',
@@ -1190,7 +1190,7 @@ def test_generate_configuration_with_multiple_plugins(mock_get_current_location,
                 'backend': [
                     'balance roundrobin',
                     'reqidel ^X-Mode:.*',
-                    'reqadd X-Mode:\ ro',
+                    'reqadd X-Mode:\\ ro',
                     'option httpchk GET /http/test_service/0/status HTTP/1.1\\r\\nX-Mode:\\ ro',
                     'http-check send-state',
                     'retries 2',
