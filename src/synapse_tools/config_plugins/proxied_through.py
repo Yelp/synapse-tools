@@ -27,7 +27,7 @@ class ProxiedThrough(HAProxyConfigPlugin):
             'acl proxied_through_backend_has_connslots connslots({proxied_through}) gt 0'.format(
                 proxied_through=proxied_through,
             ),
-            'reqadd X-Smartstack-Destination:\\ {service_name} if !is_status_request !request_from_proxy proxied_through_backend_has_connslots'.format(
+            'http-request set-header X-Smartstack-Destination {service_name} if !is_status_request !request_from_proxy proxied_through_backend_has_connslots'.format(
                 service_name=self.service_name,
             ),
             'use_backend {proxied_through} if !is_status_request !request_from_proxy proxied_through_backend_has_connslots'.format(
