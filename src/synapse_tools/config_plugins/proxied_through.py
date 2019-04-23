@@ -47,7 +47,7 @@ class ProxiedThrough(HAProxyConfigPlugin):
             'acl is_status_request path {healthcheck_uri}'.format(
                 healthcheck_uri=healthcheck_uri
             ),
-            'reqadd X-Smartstack-Source:\\ {service_name} if !is_status_request'.format(
+            'http-request set-header X-Smartstack-Source {service_name} if !is_status_request'.format(
                 service_name=service_name,
             ),
         ]
