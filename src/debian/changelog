@@ -1,3 +1,10 @@
+synapse-tools (0.13.30) lucid; urgency=medium
+
+  * Set x-smartstack-destination header instead of adding it to prevent casper
+    proxy issues due to duplicate headers
+
+ -- Kaisen Chen <kaisen@yelp.com>  Tue, 23 Apr 2019 11:14:49 -0700
+
 synapse-tools (0.13.29) lucid; urgency=medium
 
   * Add possibility to enable error logging in nginx
