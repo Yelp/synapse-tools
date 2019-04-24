@@ -23,3 +23,4 @@ deploy:
     on:
       tags: true
       repo: Yelp/synapse-tools
+      condition: $MAKE_TARGET =~ ^itest_
