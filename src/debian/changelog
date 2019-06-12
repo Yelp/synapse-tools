@@ -1,3 +1,9 @@
+synapse-tools (0.13.31) xenial; urgency=medium
+
+  * Add `make releas`e
+
+ -- Valeriy Khromov <vkhromov@yelp.com>  Wed, 12 Jun 2019 05:49:56 -0700
+
 synapse-tools (0.13.30) lucid; urgency=medium
 
   * Set x-smartstack-destination header instead of adding it to prevent casper
