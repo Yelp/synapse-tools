@@ -28,3 +28,16 @@ mypy:
 clean:
 	tox -e fix_permissions
 	git clean -Xfd
+
+# 1. Bump `version='...'` in `src/setup.py`
+# 2. Run `make release`
+VERSION = $(shell sed -n "s|.*version='\([^']*\)'.*|\1|p" src/setup.py)
+RELEASE = v$(VERSION)
+LAST_COMMIT_MSG = $(shell git log -1 --pretty=%B | sed -e 's/\x27/"/g')
+.PHONY: release
+release:
+	dch -v $(VERSION) --distribution xenial --changelog src/debian/changelog '$(LAST_COMMIT_MSG)'
+	git ci -am 'Released $(VERSION) via make release'
+	git tag $(RELEASE) master
+	git show
+	@echo 'Now run `git push origin master $(RELEASE)` to release this version'
