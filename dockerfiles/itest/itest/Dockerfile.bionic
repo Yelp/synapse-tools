@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM ubuntu:bionic
 MAINTAINER John Billings <billings@yelp.com>
 
 # Need Python 3.6
@@ -15,38 +15,30 @@ RUN apt-get update && apt-get -y install \
     python-pycurl \
     python-kazoo \
     python-zope.interface \
-    ruby1.9.1 \
-    ruby1.9.1-dev \
-    rubygems1.9.1 \
+    ruby \
+    ruby-dev \
     libxml2 \
     libxml2-dev \
     libxslt-dev \
-    libssl-dev \
     build-essential \
-    zlib1g-dev
+    zlib1g-dev \
+    nginx \
+    liblua5.3-dev \
+    libssl-dev \
+    rsyslog
 
-# Lua 5.3 for scripting with HAProxy
-WORKDIR /
-ADD http://www.lua.org/ftp/lua-5.3.1.tar.gz /lua-5.3.1.tar.gz
-RUN tar -axvf /lua-5.3.1.tar.gz
-WORKDIR /lua-5.3.1
-RUN pwd
-RUN make generic
-RUN make install INSTALL_TOP=/usr/bin/lua
-
-# Ubuntu trusty nginx and haproxy are ancient, grab newer ones
+# HAProxy configured with Lua scripting
 WORKDIR /
 ADD http://www.haproxy.org/download/1.7/src/haproxy-1.7.8.tar.gz /haproxy.tar.gz
 RUN tar -axvf /haproxy.tar.gz
 WORKDIR /haproxy-1.7.8
-RUN pwd
-RUN make TARGET=linux26 -j 4 \
+RUN make TARGET=linux26 \
     USE_LUA=1 \
-    LUA_LIB=/usr/bin/lua/lib \
-    LUA_INC=/usr/bin/lua/include \
+    LUA_LIB=/usr/lib/x86_64-linux-gnu \
+    LUA_INC=/usr/include/lua5.3 \
     && mv haproxy /usr/bin/haproxy-synapse
 
-# Nginx
+# Nginx (the upstream nginx switches to using a dynamic stream module)
 WORKDIR /
 ADD https://nginx.org/download/nginx-1.13.3.tar.gz /nginx.tar.gz
 RUN tar -axvf /nginx.tar.gz
@@ -81,7 +73,7 @@ ADD synapse-tools-nginx.conf.json /etc/synapse/synapse-tools-nginx.conf.json
 
 # Zookeeper discovery
 RUN mkdir -p /nail/etc/zookeeper_discovery/infrastructure
-ADD zookeeper_discovery/infrastructure/local.yaml.trusty /nail/etc/zookeeper_discovery/infrastructure/local.yaml
+ADD zookeeper_discovery/infrastructure/local.yaml.bionic /nail/etc/zookeeper_discovery/infrastructure/local.yaml
 
 ADD yelpsoa-configs /nail/etc/services
 ADD habitat /nail/etc/habitat

@@ -1,7 +1,7 @@
 env:
-  # Don't build for lucid because it is ancient and doesn't even have Python 2.7
   - MAKE_TARGET=itest_trusty
   - MAKE_TARGET=itest_xenial
+  - MAKE_TARGET=itest_bionic
   - MAKE_TARGET=mypy
 branch:
   only:

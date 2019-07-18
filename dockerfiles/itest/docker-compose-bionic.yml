@@ -1,0 +1,28 @@
+itest:
+  build: ../../dockerfiles/itest/itest_bionic
+  hostname: itesthost.itestdomain
+  volumes:
+   - ../..:/work
+  environment:
+    CONTAINER_PREFIX: bionic
+  links:
+   - bionicservicetwo
+   - bionicservicethree
+   - bionicservicethreechaos
+   - bionicserviceone
+   - bioniczookeeper
+
+bionicservicethree:
+  build: ../../dockerfiles/itest/service_three
+
+bionicserviceone:
+  build: ../../dockerfiles/itest/service_one
+
+bioniczookeeper:
+  build: ../../dockerfiles/itest/zookeeper
+
+bionicservicethreechaos:
+  build: ../../dockerfiles/itest/service_three
+
+bionicservicetwo:
+  build: ../../dockerfiles/itest/service_two
