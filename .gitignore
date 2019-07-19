@@ -4,11 +4,15 @@ __pycache__
 .pip/
 .tox/
 dist/
+synapse-tools*.buildinfo
 synapse-tools*.changes
+synapse-tools*.ddeb
 synapse-tools*.dsc
 synapse-tools*.tar.gz
 src/.eggs
+src/.pytest_cache/
 src/build
+src/debian/.debhelper
 src/debian/debhelper-build-stamp
 src/debian/files
 src/debian/synapse-tools
@@ -17,6 +21,7 @@ src/debian/synapse-tools.substvars
 src/synapse_tools.egg-info
 dockerfiles/itest/itest_trusty/
 dockerfiles/itest/itest_xenial/
+dockerfiles/itest/itest_bionic/
 src/debian/synapse-tools.postinst.debhelper
 src/.cache/
 bintray.json

@@ -1,0 +1,5 @@
+bionic:
+  build: ../../dockerfiles/bionic
+  command: bash -c "cd src && tox -ebionic && dpkg-buildpackage -d -uc -us && mv ../*.deb ../dist/"
+  volumes:
+   - ../..:/work
