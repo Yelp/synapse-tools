@@ -1,5 +1,4 @@
 FROM ubuntu:bionic
-MAINTAINER John Billings <billings@yelp.com>
 
 RUN apt-get update && apt-get -y install \
     debhelper \

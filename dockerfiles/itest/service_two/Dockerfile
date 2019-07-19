@@ -1,5 +1,4 @@
 FROM ubuntu:14.04
-MAINTAINER John Billings <billings@yelp.com>
 RUN apt-get update && apt-get install -y git python python-setuptools python-pip
 RUN git clone --branch yelp https://github.com/Yelp/hacheck
 RUN cd /hacheck && python setup.py install

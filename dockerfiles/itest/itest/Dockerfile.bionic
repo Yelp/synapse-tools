@@ -1,5 +1,4 @@
 FROM ubuntu:bionic
-MAINTAINER John Billings <billings@yelp.com>
 
 # Need Python 3.6
 RUN apt-get update > /dev/null && \

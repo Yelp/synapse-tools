@@ -1,5 +1,4 @@
 FROM ubuntu:14.04
-MAINTAINER John Billings <billings@yelp.com>
 
 RUN rm -f /etc/apt/sources.list.d/proposed.list
 
