@@ -186,13 +186,13 @@ def set_defaults(
         ('nginx_prefix', '/var/run/synapse/nginx_temp'),
         ('nginx_config_path', '/var/run/synapse/nginx.cfg'),
         ('nginx_pid_file_path', '/var/run/synapse/nginx.pid'),
+        ('nginx_reload_script',
+            r"""/bin/bash -c 'set -ue -o pipefail; q() { pidfile=$1; oldpid=$(cat $pidfile); kill -USR2 $oldpid; sleep 2; newpid=$(cat $pidfile); if [ $oldpid -eq $newpid ]; then return 1; fi; kill -WINCH $(cat $pidfile.oldbin); kill -QUIT $(cat $pidfile.oldbin); }; q $0'"""),
         ('nginx_proxy_proto', False),
         # http://nginx.org/en/docs/control.html#upgrade
         # This is apparently how you gracefully reload the binary ...
         ('nginx_reload_cmd_fmt',
-            'kill -USR2 $(cat {nginx_pid_file_path}) && sleep 2 && '
-            'kill -WINCH $(cat {nginx_pid_file_path}.oldbin) && '
-            'kill -QUIT $(cat {nginx_pid_file_path}.oldbin)'),
+            '{nginx_reload_script} {nginx_pid_file_path}'),
         ('nginx_start_cmd_fmt',
             'mkdir -p {nginx_prefix} && (kill -0 $(cat {nginx_pid_file_path}) || '
             '{nginx_path} -c {nginx_config_path} -p {nginx_prefix})'),
