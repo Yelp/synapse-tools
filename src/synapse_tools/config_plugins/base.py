@@ -83,6 +83,7 @@ SynapseToolsConfig = TypedDict(
         'path_based_routing': PathBasedRoutingDict,
         # 'source_required': SourceRequiredDict,
         'nginx_pid_file_path': str,
+        'nginx_reload_script': str,
         'nginx_config_path': str,
         'nginx_check_cmd_fmt': str,
         'nginx_reload_cmd_fmt': str,
