@@ -1,3 +1,10 @@
+synapse-tools (0.13.32) xenial; urgency=medium
+
+  * Merge pull request #72 from Yelp/reload-nginx-really-gracefully
+    Reload nginx really gracefully
+
+ -- Valeriy Khromov <vkhromov@yelp.com>  Tue, 24 Sep 2019 04:48:04 -0700
+
 synapse-tools (0.13.31) xenial; urgency=medium
 
   * Add `make releas`e
