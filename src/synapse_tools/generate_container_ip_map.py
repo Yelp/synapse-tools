@@ -57,22 +57,20 @@ def extract_taskid_and_ip(
                 service_ips_and_ids.append((ip_addr, task_id))
 
     # For kubernetes. If the ec2 instance is not a k8s instance, this will throw an error and be skipped.
-    # Get all pod metadata on this node
     try:
+        # Get all pod metadata on this node
         node_info = requests.get(f"http://169.254.255.2 54:10255/pods/").json()
-        for pod in node_info['items']:
-            # Fiter out instances that are not running
-            if pod['status']['phase'] != 'Running' \
-                    or 'smartstack_registrations' not in pod['metadata'].get('annotations', {}):
-                continue
-            labels = pod['metadata']['labels']
+    except Exception:
+        return service_ips_and_ids
+
+    for pod in node_info['items']:
+        labels = pod['metadata']['labels']
+        if 'yelp.com/paasta_service' in labels and 'yelp.com/paasta_instance' in labels:
             service = labels['yelp.com/paasta_service']
             instance = labels['yelp.com/paasta_instance']
             task_id = f'{service}.{instance}'.replace('_', '--')
             pod_ip = pod['status']['podIP']
             service_ips_and_ids.append((pod_ip, task_id))
-    except Exception:
-        pass
 
     return service_ips_and_ids
 
