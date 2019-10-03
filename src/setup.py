@@ -14,7 +14,7 @@ def get_install_requires():
 
 setup(
     name='synapse-tools',
-    version='0.13.32',
+    version='0.13.33',
     provides=['synapse_tools'],
     author='John Billings',
     author_email='billings@yelp.com',

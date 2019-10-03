@@ -1,3 +1,10 @@
+synapse-tools (0.13.33) xenial; urgency=medium
+
+  * add service to ip maapping for k8s services (#75)  add service to ip
+    maapping for k8s services
+
+ -- Mingqi Zhu <mingqiz@yelp.com>  Thu, 03 Oct 2019 14:32:46 -0700
+
 synapse-tools (0.13.32) xenial; urgency=medium
 
   * Merge pull request #72 from Yelp/reload-nginx-really-gracefully
