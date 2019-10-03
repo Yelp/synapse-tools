@@ -2,6 +2,7 @@
 import argparse
 import os
 import socket
+import requests
 from typing import Iterable
 from typing import Optional
 from typing import Mapping
@@ -54,6 +55,25 @@ def extract_taskid_and_ip(
                 # For compatibility with MESOS_TASK_ID format.
                 task_id = task_id.replace('_', '--')
                 service_ips_and_ids.append((ip_addr, task_id))
+
+    # For kubernetes. If the ec2 instance is not a k8s instance, this will throw an error and be skipped.
+    try:
+        # Get all pod metadata on this node
+        node_info = requests.get("http://169.254.255.254:10255/pods/").json()
+    except Exception:
+        return service_ips_and_ids
+
+    for pod in node_info['items']:
+        labels = pod['metadata']['labels']
+        if 'yelp.com/paasta_service' in labels and \
+           'yelp.com/paasta_instance' in labels and \
+           'podIP' in pod['status']:
+            service = labels['yelp.com/paasta_service']
+            instance = labels['yelp.com/paasta_instance']
+            task_id = f'{service}.{instance}'.replace('_', '--')
+            pod_ip = pod['status']['podIP']
+            service_ips_and_ids.append((pod_ip, task_id))
+
     return service_ips_and_ids
 
 
