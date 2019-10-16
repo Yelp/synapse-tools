@@ -10,6 +10,7 @@ import shutil
 import socket
 import subprocess
 import tempfile
+from itertools import product
 from typing import cast
 from typing import Dict
 from typing import List
@@ -26,6 +27,7 @@ from environment_tools.type_utils import compare_types
 from environment_tools.type_utils import get_current_location
 from paasta_tools.marathon_tools import get_all_namespaces
 from paasta_tools.long_running_service_tools import ServiceNamespaceConfig
+from paasta_tools.utils import DEFAULT_SOA_DIR
 from synapse_tools.config_plugins.base import ServiceInfo
 from synapse_tools.config_plugins.base import SynapseToolsConfig
 from synapse_tools.config_plugins.registry import PLUGIN_REGISTRY
@@ -54,6 +56,11 @@ class NginxTopLevelConfig(TypedDict):
     restart_interval: int
     restart_jitter: float
     listen_address: str
+
+
+class EndpointTimeoutConfig(TypedDict):
+    endpoint: str
+    endpoint_timeout_ms: int
 
 
 HAProxyTopLevelConfigExtraSections = TypedDict(
@@ -456,10 +463,16 @@ def get_backend_name(
     service_name: str,
     discover_type: str,
     advertise_type: str,
+    endpoint_name: str,
 ) -> str:
-    if advertise_type == discover_type:
-        return service_name
+    if endpoint_name != "default":
+        endpoint_ext = f".{endpoint_name}_timeouts"
     else:
+        endpoint_ext = ""
+    if advertise_type == discover_type:
+        return service_name + endpoint_ext
+    else:
+        return f"{service_name}.{advertise_type}{endpoint_ext}"
         return '%s.%s' % (service_name, advertise_type)
 
 
@@ -479,14 +492,25 @@ def _get_socket_path(
     return socket_path
 
 
+def _get_backends_for_service(
+    advertise_types: Iterable[str],
+    endpoint_timeouts: Dict[str, EndpointTimeoutConfig],
+) -> Iterable[Tuple[str, str]]:
+    endpoint_timeouts_names = list(endpoint_timeouts.keys()) + ['default']
+    advertise_types_endpoints = product(advertise_types, endpoint_timeouts_names)
+
+    return advertise_types_endpoints
+
+
 def generate_acls_for_service(
     service_name: str,
     discover_type: str,
     advertise_types: Iterable[str],
+    endpoint_timeouts: Dict[str, EndpointTimeoutConfig],
 ) -> ServiceAcls:
     frontend_acl_configs = []
 
-    for advertise_type in advertise_types:
+    for (advertise_type, endpoint_name) in _get_backends_for_service(advertise_types, endpoint_timeouts):
         if compare_types(discover_type, advertise_type) < 0:
             # don't create acls that downcast requests
             continue
@@ -495,15 +519,23 @@ def generate_acls_for_service(
             service_name=service_name,
             discover_type=discover_type,
             advertise_type=advertise_type,
+            endpoint_name=endpoint_name,
         )
+
+        if endpoint_name != 'default':
+            path = endpoint_timeouts[endpoint_name]['endpoint']
+            path_acl = 'acl {backend_identifier}_path path {path}'.format(backend_identifier=backend_identifier, path=path)
+        else:
+            path_acl = 'acl {backend_identifier}_path TRUE'.format(backend_identifier=backend_identifier)
 
         # use connslots acl condition
         frontend_acl_configs.extend(
             [
+                path_acl,
                 'acl {backend_identifier}_has_connslots connslots({backend_identifier}) gt 0'.format(
                     backend_identifier=backend_identifier,
                 ),
-                'use_backend {backend_identifier} if {backend_identifier}_has_connslots'.format(
+                'use_backend {backend_identifier} if {backend_identifier}_has_connslots {backend_identifier}_path'.format(
                     backend_identifier=backend_identifier,
                 ),
             ]
@@ -563,9 +595,10 @@ def generate_configuration(
             synapse_tools_config, service_name, proxy_proto=True
         )
 
-        for advertise_type in advertise_types:
+        endpoint_timeouts = service_info.get('endpoint_timeouts', {})
+        for (advertise_type, endpoint_name) in _get_backends_for_service(advertise_types, endpoint_timeouts):
             backend_identifier = get_backend_name(
-                service_name, discover_type, advertise_type
+                service_name, discover_type, advertise_type, endpoint_name
             )
             config = copy.deepcopy(base_watcher_cfg)
 
@@ -577,12 +610,21 @@ def generate_configuration(
                 },
             ]
 
+            if endpoint_name != 'default':
+                endpoint_timeout = endpoint_timeouts[endpoint_name]["endpoint_timeout_ms"]
+                config['haproxy']['backend'] = [
+                    c for c in config['haproxy']['backend']
+                    if not c.startswith("timeout server ")
+                ]
+                config['haproxy']['backend'].append('timeout server %dms' % endpoint_timeout)
+
             if proxy_port is None:
                 config['haproxy'] = {'disabled': True}
                 if synapse_tools_config['listen_with_nginx']:
                     config['nginx'] = {'disabled': True}
             else:
-                if advertise_type == discover_type:
+                if advertise_type == discover_type and endpoint_name == 'default':
+
                     # Specify a proxy port to create a frontend for this service
                     if synapse_tools_config['listen_with_haproxy']:
                         config['haproxy']['port'] = str(proxy_port)
@@ -657,6 +699,7 @@ def generate_configuration(
                     service_name=service_name,
                     discover_type=discover_type,
                     advertise_types=advertise_types,
+                    endpoint_timeouts=endpoint_timeouts,
                 )
             )
 
@@ -983,12 +1026,16 @@ def main() -> None:
         )
     )
 
+    soa_dir = os.environ.get(
+        'SOA_DIR', DEFAULT_SOA_DIR,
+    )
+
     new_synapse_config = generate_configuration(
         my_config,
         get_zookeeper_topology(
             my_config['zookeeper_topology_path']
         ),
-        get_all_namespaces(),
+        get_all_namespaces(soa_dir),
     )
 
     with tempfile.NamedTemporaryFile() as tmp_file:
