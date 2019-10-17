@@ -524,20 +524,17 @@ def generate_acls_for_service(
 
         if endpoint_name != 'default':
             path = endpoint_timeouts[endpoint_name]['endpoint']
-            path_acl = 'acl {backend_identifier}_path path {path}'.format(backend_identifier=backend_identifier, path=path)
+            path_acl_name = f' {backend_identifier}_path'
+            path_acl = [f'acl {path_acl_name} path {path}']
         else:
-            path_acl = 'acl {backend_identifier}_path TRUE'.format(backend_identifier=backend_identifier)
+            path_acl_name = ''
+            path_acl = []
 
         # use connslots acl condition
         frontend_acl_configs.extend(
-            [
-                path_acl,
-                'acl {backend_identifier}_has_connslots connslots({backend_identifier}) gt 0'.format(
-                    backend_identifier=backend_identifier,
-                ),
-                'use_backend {backend_identifier} if {backend_identifier}_has_connslots {backend_identifier}_path'.format(
-                    backend_identifier=backend_identifier,
-                ),
+            path_acl + [
+                f'acl {backend_identifier}_has_connslots connslots({backend_identifier}) gt 0',
+                f'use_backend {backend_identifier} if {backend_identifier}_has_connslots{path_acl_name}',
             ]
         )
     return frontend_acl_configs

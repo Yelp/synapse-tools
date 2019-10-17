@@ -1,0 +1,19 @@
+---
+main:
+  proxy_port: 20060
+  retries: 2
+  routes:
+  - source: another_habitat
+    destinations: [my_habitat]
+  timeout_connect_ms: 10000
+  timeout_server_ms:  11000
+  healthcheck_uri: /my_healthcheck_endpoint
+  allredisp: False
+  discover: habitat
+  advertise:
+  - habitat
+  - region
+  endpoint_timeouts:
+    foo_bar:
+      endpoint: /foo/bar
+      endpoint_timeout_ms: 1000

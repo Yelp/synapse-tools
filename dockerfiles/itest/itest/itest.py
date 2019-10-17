@@ -29,6 +29,23 @@ SERVICES = {
         'advertise': ['habitat', 'region'],
     },
 
+    'service_three_endpoint_timeout.main': {
+        'host': 'servicethree_endpoint_timeout_1',
+        'ip_address': socket.gethostbyname(CONTAINER_PREFIX + 'servicethree_endpoint_timeout_1'),
+        'port': 1024,
+        'proxy_port': 20060,
+        'mode': 'http',
+        'healthcheck_uri': '/my_healthcheck_endpoint',
+        'discover': 'habitat',
+        'advertise': ['habitat', 'region'],
+        'endpoint_timeouts': {
+            'foo_bar': {
+                'endpoint': '/foo/bar',
+                'endpoint_timeout_ms': 1000,
+            },
+        }
+    },
+
     # HTTP service with a custom endpoint
     'service_three.logging': {
         'host': 'servicethree_1',
@@ -221,6 +238,10 @@ class TestGroupOne(object):
             'service_three_chaos.main',
             'service_two.main',
             'service_three.logging',
+            'service_three_endpoint_timeout.main.foo_bar_timeouts',
+            'service_three_endpoint_timeout.main',
+            'service_three_endpoint_timeout.main.region.foo_bar_timeouts',
+            'service_three_endpoint_timeout.main.region',
         ]
 
         with open('/etc/synapse/synapse.conf.json') as fd:
@@ -236,6 +257,7 @@ class TestGroupOne(object):
                 'service_two.main.nginx_listener',
                 'service_three.main.nginx_listener',
                 'service_three.logging.nginx_listener',
+                'service_three_endpoint_timeout.main.nginx_listener',
             ]
             expected_services.extend(nginx_services)
 

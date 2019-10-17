@@ -11,6 +11,10 @@ itest:
    - bionicservicethreechaos
    - bionicserviceone
    - bioniczookeeper
+   - bionicservicethree_endpoint_timeout
+
+bionicservicethree_endpoint_timeout:
+  build: ../../dockerfiles/itest/service_three
 
 bionicservicethree:
   build: ../../dockerfiles/itest/service_three

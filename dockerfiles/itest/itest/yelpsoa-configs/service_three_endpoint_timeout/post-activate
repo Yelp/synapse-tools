@@ -1,0 +1,8 @@
+#!/bin/sh
+
+newversion="$1"
+oldversion="$2"
+basedir="$3"
+
+# Do nothing
+exit 0
