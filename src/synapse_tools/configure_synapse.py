@@ -478,7 +478,6 @@ def get_backend_name(
         return service_name + endpoint_ext
     else:
         return f"{service_name}.{advertise_type}{endpoint_ext}"
-        return '%s.%s' % (service_name, advertise_type)
 
 
 def _get_socket_path(
