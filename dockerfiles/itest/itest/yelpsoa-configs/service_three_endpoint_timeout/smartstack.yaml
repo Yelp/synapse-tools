@@ -1,6 +1,6 @@
 ---
 main:
-  proxy_port: 20060
+  proxy_port: 20070
   retries: 2
   routes:
   - source: another_habitat

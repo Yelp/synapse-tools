@@ -465,6 +465,11 @@ def get_backend_name(
     advertise_type: str,
     endpoint_name: str,
 ) -> str:
+    """Get the name of the backend, given the service name, discover and advertise types,
+    and endpoint name (for per-endpoint overrides).
+    If the endpoint_name is default, don't include it, to keep compatibility with the naming
+    from before adding per-endpoint timeouts.
+    """
     if endpoint_name != "default":
         endpoint_ext = f".{endpoint_name}_timeouts"
     else:
@@ -496,6 +501,9 @@ def _get_backends_for_service(
     advertise_types: Iterable[str],
     endpoint_timeouts: Dict[str, EndpointTimeoutConfig],
 ) -> Iterable[Tuple[str, str]]:
+    """Get the cartesian product of advertise types and endpoint timeout overrides.
+    This is used to make the list of backends for synapse.conf.json.
+    """
     endpoint_timeouts_names = list(endpoint_timeouts.keys()) + ['default']
     advertise_types_endpoints = product(advertise_types, endpoint_timeouts_names)
 
@@ -522,8 +530,10 @@ def generate_acls_for_service(
             endpoint_name=endpoint_name,
         )
 
+        # non-default backends have an extra ACL to match the path
         if endpoint_name != 'default':
             path = endpoint_timeouts[endpoint_name]['endpoint']
+            # note: intentional " " in the beginning of this string
             path_acl_name = f' {backend_identifier}_path'
             path_acl = [f'acl {path_acl_name} path {path}']
         else:
@@ -609,6 +619,7 @@ def generate_configuration(
 
             if endpoint_name != 'default':
                 endpoint_timeout = endpoint_timeouts[endpoint_name]["endpoint_timeout_ms"]
+                # Override the 'timeout server' value
                 config['haproxy']['backend'] = [
                     c for c in config['haproxy']['backend']
                     if not c.startswith("timeout server ")
@@ -1023,6 +1034,7 @@ def main() -> None:
         )
     )
 
+    # Allow overriding the SOA directory
     soa_dir = os.environ.get(
         'SOA_DIR', DEFAULT_SOA_DIR,
     )

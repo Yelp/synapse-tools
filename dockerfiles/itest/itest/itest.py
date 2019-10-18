@@ -33,7 +33,7 @@ SERVICES = {
         'host': 'servicethree_endpoint_timeout_1',
         'ip_address': socket.gethostbyname(CONTAINER_PREFIX + 'servicethree_endpoint_timeout_1'),
         'port': 1024,
-        'proxy_port': 20060,
+        'proxy_port': 20070,
         'mode': 'http',
         'healthcheck_uri': '/my_healthcheck_endpoint',
         'discover': 'habitat',
