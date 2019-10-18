@@ -428,6 +428,14 @@ class TestGroupOne(object):
                     assert page.read().strip() == 'OK'
 
 
+    def test_http_service_endpoint_timeout_using_haproxy(self, setup):
+        data = SERVICES['service_three_endpoint_timeout.main']
+        proxy_port = data['proxy_port']
+        uri = "http://localhost:%s/foo/bar" % proxy_port
+        with contextlib.closing(urllib2.urlopen(uri, timeout=SOCKET_TIMEOUT)) as page:
+            assert page.read().strip() == 'OK'
+
+
     def test_tcp_service_is_accessible_using_haproxy(self, setup):
         for name, data in SERVICES.iteritems():
             if data['mode'] == 'tcp':
