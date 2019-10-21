@@ -474,10 +474,11 @@ def get_backend_name(
         endpoint_ext = f".{endpoint_name}_timeouts"
     else:
         endpoint_ext = ""
-    if advertise_type == discover_type:
-        return service_name + endpoint_ext
+    if advertise_type != discover_type:
+        advertise_ext = f".{advertise_type}"
     else:
-        return f"{service_name}.{advertise_type}{endpoint_ext}"
+        advertise_ext = ""
+    return f"{service_name}{advertise_ext}{endpoint_ext}"
 
 
 def _get_socket_path(
