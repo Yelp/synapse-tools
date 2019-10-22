@@ -256,7 +256,6 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts(mock_get_
                     'balance': 'roundrobin',
                     'advertise': ['region'],
                     'discover': 'region',
-                    # endpoint timeouts are disabled by default, so this should have no effect
                     'endpoint_timeouts': {
                         'foo_bar': {
                             'endpoint': '/foo/bar',
@@ -287,7 +286,6 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts(mock_get_
                         'X-Mode': 'ro'
                     },
                     'balance': 'roundrobin',
-                    # endpoint timeouts are disabled by default, so this should have no effect
                     'endpoint_timeouts': {
                         'foo_bar': {
                             'endpoint': '/foo/bar',
@@ -415,7 +413,6 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts_with_defa
                     'balance': 'roundrobin',
                     'advertise': ['region'],
                     'discover': 'region',
-                    # endpoint timeouts are disabled by default, so this should have no effect
                     'endpoint_timeouts': {
                         'foo_bar': {
                             'endpoint': '/foo/bar',
@@ -444,7 +441,6 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts_with_defa
                         'X-Mode': 'ro'
                     },
                     'balance': 'roundrobin',
-                    # endpoint timeouts are disabled by default, so this should have no effect
                     'endpoint_timeouts': {
                         'foo_bar': {
                             'endpoint': '/foo/bar',

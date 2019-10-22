@@ -635,9 +635,9 @@ def generate_configuration(
             if endpoint_name != 'default':
                 endpoint_timeout = endpoint_timeouts[endpoint_name]["endpoint_timeout_ms"]
                 # Override the 'timeout server' value
-                timeout_index = [i for i, v in enumerate(config['haproxy']['backend']) if v.startswith("timeout server ")]
-                if len(timeout_index) > 0:
-                    timeout_index = timeout_index[0]
+                timeout_index_list = [i for i, v in enumerate(config['haproxy']['backend']) if v.startswith("timeout server ")]
+                if len(timeout_index_list) > 0:
+                    timeout_index = timeout_index_list[0]
                     config['haproxy']['backend'][timeout_index] = 'timeout server %dms' % endpoint_timeout
                 else:
                     config['haproxy']['backend'].append('timeout server %dms' % endpoint_timeout)
