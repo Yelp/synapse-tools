@@ -157,6 +157,7 @@ def set_defaults(
 
     defaults = [
         ('bind_addr', '0.0.0.0'),
+        ('enable_per_endpoint_timeouts', False),
         # HAProxy related options
         ('listen_with_haproxy', True),
         ('haproxy.defaults.inter', '10m'),
@@ -500,13 +501,17 @@ def _get_socket_path(
 def _get_backends_for_service(
     advertise_types: Iterable[str],
     endpoint_timeouts: Dict[str, EndpointTimeoutConfig],
+    per_endpoint_timeouts_enabled: bool,
 ) -> Iterable[Tuple[str, str]]:
     """Get the cartesian product of advertise types and endpoint timeout overrides.
     This is used to make the list of backends for synapse.conf.json.
     """
-    endpoint_timeouts_names = list(endpoint_timeouts.keys()) + ['default']
-    advertise_types_endpoints = product(advertise_types, endpoint_timeouts_names)
+    if per_endpoint_timeouts_enabled:
+        endpoint_timeouts_names = list(endpoint_timeouts.keys()) + ['default']
+    else:
+        endpoint_timeouts_names = ['default']
 
+    advertise_types_endpoints = product(advertise_types, endpoint_timeouts_names)
     return advertise_types_endpoints
 
 
@@ -515,10 +520,15 @@ def generate_acls_for_service(
     discover_type: str,
     advertise_types: Iterable[str],
     endpoint_timeouts: Dict[str, EndpointTimeoutConfig],
+    per_endpoint_timeouts_enabled: bool,
 ) -> ServiceAcls:
     frontend_acl_configs = []
 
-    for (advertise_type, endpoint_name) in _get_backends_for_service(advertise_types, endpoint_timeouts):
+    for (advertise_type, endpoint_name) in _get_backends_for_service(
+        advertise_types,
+        endpoint_timeouts,
+        per_endpoint_timeouts_enabled,
+    ):
         if compare_types(discover_type, advertise_type) < 0:
             # don't create acls that downcast requests
             continue
@@ -535,7 +545,7 @@ def generate_acls_for_service(
             path = endpoint_timeouts[endpoint_name]['endpoint']
             # note: intentional " " in the beginning of this string
             path_acl_name = f' {backend_identifier}_path'
-            path_acl = [f'acl {path_acl_name} path {path}']
+            path_acl = [f'acl{path_acl_name} path {path}']
         else:
             path_acl_name = ''
             path_acl = []
@@ -562,6 +572,7 @@ def generate_configuration(
         for depth, loc in enumerate(available_locations)
     }
     available_locations = set(available_locations)
+    per_endpoint_timeouts_enabled = synapse_tools_config['enable_per_endpoint_timeouts']
 
     for (service_name, service_info) in services:
         proxy_port = service_info.get('proxy_port', -1)
@@ -603,7 +614,11 @@ def generate_configuration(
         )
 
         endpoint_timeouts = service_info.get('endpoint_timeouts', {})
-        for (advertise_type, endpoint_name) in _get_backends_for_service(advertise_types, endpoint_timeouts):
+        for (advertise_type, endpoint_name) in _get_backends_for_service(
+            advertise_types,
+            endpoint_timeouts,
+            per_endpoint_timeouts_enabled,
+        ):
             backend_identifier = get_backend_name(
                 service_name, discover_type, advertise_type, endpoint_name
             )
@@ -620,11 +635,12 @@ def generate_configuration(
             if endpoint_name != 'default':
                 endpoint_timeout = endpoint_timeouts[endpoint_name]["endpoint_timeout_ms"]
                 # Override the 'timeout server' value
-                config['haproxy']['backend'] = [
-                    c for c in config['haproxy']['backend']
-                    if not c.startswith("timeout server ")
-                ]
-                config['haproxy']['backend'].append('timeout server %dms' % endpoint_timeout)
+                timeout_index = [i for i, v in enumerate(config['haproxy']['backend']) if v.startswith("timeout server ")]
+                if len(timeout_index) > 0:
+                    timeout_index = timeout_index[0]
+                    config['haproxy']['backend'][timeout_index] = 'timeout server %dms' % endpoint_timeout
+                else:
+                    config['haproxy']['backend'].append('timeout server %dms' % endpoint_timeout)
 
             if proxy_port is None:
                 config['haproxy'] = {'disabled': True}
@@ -708,6 +724,7 @@ def generate_configuration(
                     discover_type=discover_type,
                     advertise_types=advertise_types,
                     endpoint_timeouts=endpoint_timeouts,
+                    per_endpoint_timeouts_enabled=per_endpoint_timeouts_enabled,
                 )
             )
 

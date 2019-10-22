@@ -50,6 +50,7 @@ SynapseToolsConfig = TypedDict(
         'bind_addr': str,
         'config_file': str,
         'enable_map_debug': bool,
+        'enable_per_endpoint_timeouts': bool,
         'errorfiles': Mapping[str, str],
         'file_output_path': str,
         'hacheck_port': int,
