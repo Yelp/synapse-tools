@@ -545,7 +545,7 @@ def generate_acls_for_service(
             path = endpoint_timeouts[endpoint_name]['endpoint']
             # note: intentional " " in the beginning of this string
             path_acl_name = f' {backend_identifier}_path'
-            path_acl = [f'acl{path_acl_name} path {path}']
+            path_acl = [f'acl{path_acl_name} path_beg {path}']
         else:
             path_acl_name = ''
             path_acl = []
