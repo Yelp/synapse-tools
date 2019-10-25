@@ -18,6 +18,7 @@ from typing import Mapping
 from typing import Optional
 from typing import Tuple
 from typing import Iterable
+from typing import Union
 from mypy_extensions import TypedDict
 
 import yaml
@@ -469,7 +470,7 @@ def get_backend_name(
     service_name: str,
     discover_type: str,
     advertise_type: str,
-    endpoint_name: str,
+    endpoint_name: Union[str, object],
 ) -> str:
     """Get the name of the backend, given the service name, discover and advertise types,
     and endpoint name (for per-endpoint overrides).
@@ -507,14 +508,16 @@ def _get_backends_for_service(
     advertise_types: Iterable[str],
     endpoint_timeouts: Dict[str, EndpointTimeoutConfig],
     per_endpoint_timeouts_enabled: bool,
-) -> Iterable[Tuple[str, str]]:
+) -> Iterable[Tuple[str, Union[str, object]]]:
     """Get the cartesian product of advertise types and endpoint timeout overrides.
     This is used to make the list of backends for synapse.conf.json.
     """
+    endpoint_timeouts_names: List[Union[str, object]] = []
     if per_endpoint_timeouts_enabled:
-        endpoint_timeouts_names = list(endpoint_timeouts.keys()) + [HAPROXY_DEFAULT_SECTION_SENTINAL]
+        endpoint_timeouts_names = list(endpoint_timeouts.keys())
+        endpoint_timeouts_names.append(HAPROXY_DEFAULT_SECTION_SENTINAL)
     else:
-        endpoint_timeouts_names = [HAPROXY_DEFAULT_SECTION_SENTINAL]
+         endpoint_timeouts_names = [HAPROXY_DEFAULT_SECTION_SENTINAL]
 
     advertise_types_endpoints = product(advertise_types, endpoint_timeouts_names)
     return advertise_types_endpoints
@@ -547,6 +550,7 @@ def generate_acls_for_service(
 
         # non-default backends have an extra ACL to match the path
         if endpoint_name != HAPROXY_DEFAULT_SECTION_SENTINAL:
+            endpoint_name = cast(str, endpoint_name)
             path = endpoint_timeouts[endpoint_name]['endpoint']
             # note: intentional " " in the beginning of this string
             path_acl_name = f' {backend_identifier}_path'
