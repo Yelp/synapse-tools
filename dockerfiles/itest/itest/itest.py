@@ -39,7 +39,7 @@ SERVICES = {
         'discover': 'habitat',
         'advertise': ['habitat', 'region'],
         'endpoint_timeouts': {
-            'foo_bar': {
+            'example_endpoint': {
                 'endpoint': '/foo/bar',
                 'endpoint_timeout_ms': 1000,
             },
@@ -238,9 +238,9 @@ class TestGroupOne(object):
             'service_three_chaos.main',
             'service_two.main',
             'service_three.logging',
-            'service_three_endpoint_timeout.main.foo_bar_timeouts',
+            'service_three_endpoint_timeout.main.example_endpoint_timeouts',
             'service_three_endpoint_timeout.main',
-            'service_three_endpoint_timeout.main.region.foo_bar_timeouts',
+            'service_three_endpoint_timeout.main.region.example_endpoint_timeouts',
             'service_three_endpoint_timeout.main.region',
         ]
 
