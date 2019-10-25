@@ -35,6 +35,11 @@ from synapse_tools.haproxy_synapse_reaper import DEFAULT_REAP_AGE_S
 from yaml import CLoader  # type: ignore
 
 
+# This is to keep track of the "default" haproxy section
+#  (eg no overridden timeout)
+HAPROXY_DEFAULT_SECTION_SENTINAL = object()
+
+
 class DiscoveryDict(TypedDict, total=False):
     method: str
     label_filters: Iterable[Mapping[str, str]]
@@ -471,7 +476,7 @@ def get_backend_name(
     If the endpoint_name is default, don't include it, to keep compatibility with the naming
     from before adding per-endpoint timeouts.
     """
-    if endpoint_name != "default":
+    if endpoint_name != HAPROXY_DEFAULT_SECTION_SENTINAL:
         endpoint_ext = f".{endpoint_name}_timeouts"
     else:
         endpoint_ext = ""
@@ -507,9 +512,9 @@ def _get_backends_for_service(
     This is used to make the list of backends for synapse.conf.json.
     """
     if per_endpoint_timeouts_enabled:
-        endpoint_timeouts_names = list(endpoint_timeouts.keys()) + ['default']
+        endpoint_timeouts_names = list(endpoint_timeouts.keys()) + [HAPROXY_DEFAULT_SECTION_SENTINAL]
     else:
-        endpoint_timeouts_names = ['default']
+        endpoint_timeouts_names = [HAPROXY_DEFAULT_SECTION_SENTINAL]
 
     advertise_types_endpoints = product(advertise_types, endpoint_timeouts_names)
     return advertise_types_endpoints
@@ -541,7 +546,7 @@ def generate_acls_for_service(
         )
 
         # non-default backends have an extra ACL to match the path
-        if endpoint_name != 'default':
+        if endpoint_name != HAPROXY_DEFAULT_SECTION_SENTINAL:
             path = endpoint_timeouts[endpoint_name]['endpoint']
             # note: intentional " " in the beginning of this string
             path_acl_name = f' {backend_identifier}_path'
@@ -632,7 +637,7 @@ def generate_configuration(
                 },
             ]
 
-            if endpoint_name != 'default':
+            if endpoint_name != HAPROXY_DEFAULT_SECTION_SENTINAL:
                 endpoint_timeout = endpoint_timeouts[endpoint_name]["endpoint_timeout_ms"]
                 # Override the 'timeout server' value
                 timeout_index_list = [i for i, v in enumerate(config['haproxy']['backend']) if v.startswith("timeout server ")]
@@ -647,7 +652,7 @@ def generate_configuration(
                 if synapse_tools_config['listen_with_nginx']:
                     config['nginx'] = {'disabled': True}
             else:
-                if advertise_type == discover_type and endpoint_name == 'default':
+                if advertise_type == discover_type and endpoint_name == HAPROXY_DEFAULT_SECTION_SENTINAL:
 
                     # Specify a proxy port to create a frontend for this service
                     if synapse_tools_config['listen_with_haproxy']:
