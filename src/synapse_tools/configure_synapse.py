@@ -517,7 +517,7 @@ def _get_backends_for_service(
         endpoint_timeouts_names = list(endpoint_timeouts.keys())
         endpoint_timeouts_names.append(HAPROXY_DEFAULT_SECTION_SENTINAL)
     else:
-         endpoint_timeouts_names = [HAPROXY_DEFAULT_SECTION_SENTINAL]
+        endpoint_timeouts_names = [HAPROXY_DEFAULT_SECTION_SENTINAL]
 
     advertise_types_endpoints = product(advertise_types, endpoint_timeouts_names)
     return advertise_types_endpoints
