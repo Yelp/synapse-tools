@@ -39,10 +39,7 @@ SERVICES = {
         'discover': 'habitat',
         'advertise': ['habitat', 'region'],
         'endpoint_timeouts': {
-            'example_endpoint': {
-                'endpoint': '/foo/bar',
-                'endpoint_timeout_ms': 1000,
-            },
+            '/example/endpoint': 1000,
         }
     },
 
@@ -238,9 +235,9 @@ class TestGroupOne(object):
             'service_three_chaos.main',
             'service_two.main',
             'service_three.logging',
-            'service_three_endpoint_timeout.main.example_endpoint_timeouts',
+            'service_three_endpoint_timeout.main._example_endpoint_timeouts',
             'service_three_endpoint_timeout.main',
-            'service_three_endpoint_timeout.main.region.example_endpoint_timeouts',
+            'service_three_endpoint_timeout.main.region._example_endpoint_timeouts',
             'service_three_endpoint_timeout.main.region',
         ]
 
@@ -431,7 +428,7 @@ class TestGroupOne(object):
     def test_http_service_endpoint_timeout_using_haproxy(self, setup):
         data = SERVICES['service_three_endpoint_timeout.main']
         proxy_port = data['proxy_port']
-        uri = "http://localhost:%s/foo/bar" % proxy_port
+        uri = "http://localhost:%s/example/endpoint" % proxy_port
         with contextlib.closing(urllib2.urlopen(uri, timeout=SOCKET_TIMEOUT)) as page:
             assert page.read().strip() == 'OK'
 
