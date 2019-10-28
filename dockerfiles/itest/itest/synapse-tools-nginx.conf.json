@@ -1,7 +1,6 @@
 {
   "config_file": "/etc/synapse/synapse.conf.json",
   "bind_addr": "0.0.0.0",
-  "enable_per_endpoint_timeouts": true,
   "stats_port": 32123,
   "haproxy.defaults.inter": "10s",
   "listen_with_haproxy": false,

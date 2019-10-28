@@ -158,7 +158,6 @@ def set_defaults(
 
     defaults = [
         ('bind_addr', '0.0.0.0'),
-        ('enable_per_endpoint_timeouts', False),
         # HAProxy related options
         ('listen_with_haproxy', True),
         ('haproxy.defaults.inter', '10m'),
@@ -508,17 +507,13 @@ def _get_socket_path(
 def _get_backends_for_service(
     advertise_types: Iterable[str],
     endpoint_timeouts: Dict[str, int],
-    per_endpoint_timeouts_enabled: bool,
 ) -> Iterable[Tuple[str, Union[str, object]]]:
     """Get the cartesian product of advertise types and endpoint timeout overrides.
     This is used to make the list of backends for synapse.conf.json.
     """
     endpoint_timeouts_names: List[Union[str, object]] = []
-    if per_endpoint_timeouts_enabled:
-        endpoint_timeouts_names = list(endpoint_timeouts.keys())
-        endpoint_timeouts_names.append(HAPROXY_DEFAULT_SECTION_SENTINEL)
-    else:
-        endpoint_timeouts_names = [HAPROXY_DEFAULT_SECTION_SENTINEL]
+    endpoint_timeouts_names = list(endpoint_timeouts.keys())
+    endpoint_timeouts_names.append(HAPROXY_DEFAULT_SECTION_SENTINEL)
 
     advertise_types_endpoints = product(advertise_types, endpoint_timeouts_names)
     return advertise_types_endpoints
@@ -529,14 +524,12 @@ def generate_acls_for_service(
     discover_type: str,
     advertise_types: Iterable[str],
     endpoint_timeouts: Dict[str, int],
-    per_endpoint_timeouts_enabled: bool,
 ) -> ServiceAcls:
     frontend_acl_configs = []
 
     for (advertise_type, endpoint_name) in _get_backends_for_service(
         advertise_types,
         endpoint_timeouts,
-        per_endpoint_timeouts_enabled,
     ):
         if compare_types(discover_type, advertise_type) < 0:
             # don't create acls that downcast requests
@@ -582,7 +575,6 @@ def generate_configuration(
         for depth, loc in enumerate(available_locations)
     }
     available_locations = set(available_locations)
-    per_endpoint_timeouts_enabled = synapse_tools_config['enable_per_endpoint_timeouts']
 
     for (service_name, service_info) in services:
         proxy_port = service_info.get('proxy_port', -1)
@@ -627,7 +619,6 @@ def generate_configuration(
         for (advertise_type, endpoint_name) in _get_backends_for_service(
             advertise_types,
             endpoint_timeouts,
-            per_endpoint_timeouts_enabled,
         ):
             backend_identifier = get_backend_name(
                 service_name, discover_type, advertise_type, endpoint_name
@@ -734,7 +725,6 @@ def generate_configuration(
                     discover_type=discover_type,
                     advertise_types=advertise_types,
                     endpoint_timeouts=endpoint_timeouts,
-                    per_endpoint_timeouts_enabled=per_endpoint_timeouts_enabled,
                 )
             )
 

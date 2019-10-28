@@ -73,11 +73,6 @@ def test_generate_configuration(mock_get_current_location, mock_available_locati
                     'balance': 'roundrobin',
                     'advertise': ['region', 'superregion'],
                     'discover': 'region',
-                    # endpoint timeouts are disabled by default, so this should have no effect
-                    'endpoint_timeouts': {
-                        '/example/endpoint': 10000,
-                        '/example/two/': 100,
-                    }
                 }
             )
         ]
@@ -104,11 +99,6 @@ def test_generate_configuration(mock_get_current_location, mock_available_locati
                     'balance': 'roundrobin',
                     'advertise': ['superregion', 'region'],
                     'discover': 'region',
-                    # endpoint timeouts are disabled by default, so this should have no effect
-                    'endpoint_timeouts': {
-                        '/example/endpoint': 10000,
-                        '/example/two/': 100,
-                    }
                 }
             )
         ]
@@ -232,7 +222,7 @@ def test_generate_configuration_with_errorfiles(mock_get_current_location, mock_
 
 def test_generate_configuration_single_advertise_per_endpoint_timeouts(mock_get_current_location, mock_available_location_types):
     actual_configuration = configure_synapse.generate_configuration(
-        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0', 'enable_per_endpoint_timeouts': True}),
+        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'}),
         zookeeper_topology=['1.2.3.4', '2.3.4.5'],
         services=[
             (
@@ -262,7 +252,7 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts(mock_get_
     )
 
     actual_configuration_default_advertise = configure_synapse.generate_configuration(
-        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0', 'enable_per_endpoint_timeouts': True}),
+        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'}),
         zookeeper_topology=['1.2.3.4', '2.3.4.5'],
         services=[
             (
@@ -290,7 +280,7 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts(mock_get_
     )
 
     expected_configuration = configure_synapse.generate_base_config(
-        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0', 'enable_per_endpoint_timeouts': True})
+        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'})
     )
     expected_configuration['services'] = {
         'test_service': {
@@ -422,7 +412,7 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts(mock_get_
 
 def test_generate_configuration_single_advertise_per_endpoint_timeouts_with_default_timeout(mock_get_current_location, mock_available_location_types):
     actual_configuration = configure_synapse.generate_configuration(
-        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0', 'enable_per_endpoint_timeouts': True}),
+        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'}),
         zookeeper_topology=['1.2.3.4', '2.3.4.5'],
         services=[
             (
@@ -450,7 +440,7 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts_with_defa
     )
 
     actual_configuration_default_advertise = configure_synapse.generate_configuration(
-        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0', 'enable_per_endpoint_timeouts': True}),
+        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'}),
         zookeeper_topology=['1.2.3.4', '2.3.4.5'],
         services=[
             (
@@ -476,7 +466,7 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts_with_defa
     )
 
     expected_configuration = configure_synapse.generate_base_config(
-        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0', 'enable_per_endpoint_timeouts': True})
+        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'})
     )
     expected_configuration['services'] = {
         'test_service': {
