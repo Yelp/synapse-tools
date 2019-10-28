@@ -76,6 +76,7 @@ def test_generate_configuration(mock_get_current_location, mock_available_locati
                     # endpoint timeouts are disabled by default, so this should have no effect
                     'endpoint_timeouts': {
                         '/example/endpoint': 10000,
+                        '/example/two/': 100,
                     }
                 }
             )
@@ -106,6 +107,7 @@ def test_generate_configuration(mock_get_current_location, mock_available_locati
                     # endpoint timeouts are disabled by default, so this should have no effect
                     'endpoint_timeouts': {
                         '/example/endpoint': 10000,
+                        '/example/two/': 100,
                     }
                 }
             )
@@ -252,6 +254,7 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts(mock_get_
                     'discover': 'region',
                     'endpoint_timeouts': {
                         '/example/endpoint': 10000,
+                        '/example/two/': 100,
                     }
                 }
             )
@@ -279,6 +282,7 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts(mock_get_
                     'balance': 'roundrobin',
                     'endpoint_timeouts': {
                         '/example/endpoint': 10000,
+                        '/example/two/': 100,
                     }
                 }
             )
@@ -319,6 +323,9 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts(mock_get_
                     'acl test_service._example_endpoint_timeouts_path path_beg /example/endpoint',
                     'acl test_service._example_endpoint_timeouts_has_connslots connslots(test_service._example_endpoint_timeouts) gt 0',
                     'use_backend test_service._example_endpoint_timeouts if test_service._example_endpoint_timeouts_has_connslots test_service._example_endpoint_timeouts_path',
+                    'acl test_service._example_two__timeouts_path path_beg /example/two/',
+                    'acl test_service._example_two__timeouts_has_connslots connslots(test_service._example_two__timeouts) gt 0',
+                    'use_backend test_service._example_two__timeouts if test_service._example_two__timeouts_has_connslots test_service._example_two__timeouts_path',
                     'acl test_service_has_connslots connslots(test_service) gt 0',
                     'use_backend test_service if test_service_has_connslots',
                 ],
@@ -371,6 +378,38 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts(mock_get_
                 'backend_name': 'test_service._example_endpoint_timeouts',
             },
         },
+        'test_service._example_two__timeouts': {
+            'default_servers': [],
+            'use_previous_backends': False,
+            'discovery': {
+                'hosts': ['1.2.3.4', '2.3.4.5'],
+                'method': 'zookeeper',
+                'path': '/smartstack/global/test_service',
+                'label_filters': [
+                    {
+                        'label': 'region:my_region',
+                        'value': '',
+                        'condition': 'equals',
+                    },
+                ],
+            },
+            'haproxy': {
+                'listen': [],
+                'backend': [
+                    'balance roundrobin',
+                    'reqidel ^X-Mode:.*',
+                    'reqadd X-Mode:\\ ro',
+                    'option httpchk GET /http/test_service/0/status HTTP/1.1\\r\\nX-Mode:\\ ro',
+                    'http-check send-state',
+                    'retries 3',
+                    'timeout connect 2000ms',
+                    'timeout server 100ms',
+                    # Note: tarpit options don't work for per-endpoint backends
+                ],
+                'server_options': 'check port 6666 observe layer7 maxconn 50 maxqueue 10',
+                'backend_name': 'test_service._example_two__timeouts',
+            },
+        },
     }
 
     expected_configuration['haproxy']['defaults'].extend([
@@ -403,6 +442,7 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts_with_defa
                     'discover': 'region',
                     'endpoint_timeouts': {
                         '/example/endpoint': 10000,
+                        '/example/two/': 100,
                     }
                 }
             )
@@ -428,6 +468,7 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts_with_defa
                     'balance': 'roundrobin',
                     'endpoint_timeouts': {
                         '/example/endpoint': 10000,
+                        '/example/two/': 100,
                     }
                 }
             )
@@ -467,6 +508,9 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts_with_defa
                     'acl test_service._example_endpoint_timeouts_path path_beg /example/endpoint',
                     'acl test_service._example_endpoint_timeouts_has_connslots connslots(test_service._example_endpoint_timeouts) gt 0',
                     'use_backend test_service._example_endpoint_timeouts if test_service._example_endpoint_timeouts_has_connslots test_service._example_endpoint_timeouts_path',
+                    'acl test_service._example_two__timeouts_path path_beg /example/two/',
+                    'acl test_service._example_two__timeouts_has_connslots connslots(test_service._example_two__timeouts) gt 0',
+                    'use_backend test_service._example_two__timeouts if test_service._example_two__timeouts_has_connslots test_service._example_two__timeouts_path',
                     'acl test_service_has_connslots connslots(test_service) gt 0',
                     'use_backend test_service if test_service_has_connslots',
                 ],
@@ -514,6 +558,37 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts_with_defa
                 ],
                 'server_options': 'check port 6666 observe layer7 maxconn 50 maxqueue 10',
                 'backend_name': 'test_service._example_endpoint_timeouts',
+            },
+        },
+        'test_service._example_two__timeouts': {
+            'default_servers': [],
+            'use_previous_backends': False,
+            'discovery': {
+                'hosts': ['1.2.3.4', '2.3.4.5'],
+                'method': 'zookeeper',
+                'path': '/smartstack/global/test_service',
+                'label_filters': [
+                    {
+                        'label': 'region:my_region',
+                        'value': '',
+                        'condition': 'equals',
+                    },
+                ],
+            },
+            'haproxy': {
+                'listen': [],
+                'backend': [
+                    'balance roundrobin',
+                    'reqidel ^X-Mode:.*',
+                    'reqadd X-Mode:\\ ro',
+                    'option httpchk GET /http/test_service/0/status HTTP/1.1\\r\\nX-Mode:\\ ro',
+                    'http-check send-state',
+                    'retries 3',
+                    'timeout server 100ms',
+                    # Note: tarpit options don't work for per-endpoint backends
+                ],
+                'server_options': 'check port 6666 observe layer7 maxconn 50 maxqueue 10',
+                'backend_name': 'test_service._example_two__timeouts',
             },
         },
     }
