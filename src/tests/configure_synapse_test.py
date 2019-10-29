@@ -310,12 +310,12 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts(mock_get_
                     'option httplog',
                     'bind /var/run/synapse/sockets/test_service.sock',
                     'bind /var/run/synapse/sockets/test_service.prxy accept-proxy',
-                    'acl test_service._example_endpoint_timeouts_path path_beg /example/endpoint',
-                    'acl test_service._example_endpoint_timeouts_has_connslots connslots(test_service._example_endpoint_timeouts) gt 0',
-                    'use_backend test_service._example_endpoint_timeouts if test_service._example_endpoint_timeouts_has_connslots test_service._example_endpoint_timeouts_path',
-                    'acl test_service._example_two__timeouts_path path_beg /example/two/',
-                    'acl test_service._example_two__timeouts_has_connslots connslots(test_service._example_two__timeouts) gt 0',
-                    'use_backend test_service._example_two__timeouts if test_service._example_two__timeouts_has_connslots test_service._example_two__timeouts_path',
+                    'acl test_service.__example__endpoint_timeouts_path path_beg /example/endpoint',
+                    'acl test_service.__example__endpoint_timeouts_has_connslots connslots(test_service.__example__endpoint_timeouts) gt 0',
+                    'use_backend test_service.__example__endpoint_timeouts if test_service.__example__endpoint_timeouts_has_connslots test_service.__example__endpoint_timeouts_path',
+                    'acl test_service.__example__two___timeouts_path path_beg /example/two/',
+                    'acl test_service.__example__two___timeouts_has_connslots connslots(test_service.__example__two___timeouts) gt 0',
+                    'use_backend test_service.__example__two___timeouts if test_service.__example__two___timeouts_has_connslots test_service.__example__two___timeouts_path',
                     'acl test_service_has_connslots connslots(test_service) gt 0',
                     'use_backend test_service if test_service_has_connslots',
                 ],
@@ -336,7 +336,7 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts(mock_get_
                 'backend_name': 'test_service',
             },
         },
-        'test_service._example_endpoint_timeouts': {
+        'test_service.__example__endpoint_timeouts': {
             'default_servers': [],
             'use_previous_backends': False,
             'discovery': {
@@ -365,10 +365,10 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts(mock_get_
                     # Note: tarpit options don't work for per-endpoint backends
                 ],
                 'server_options': 'check port 6666 observe layer7 maxconn 50 maxqueue 10',
-                'backend_name': 'test_service._example_endpoint_timeouts',
+                'backend_name': 'test_service.__example__endpoint_timeouts',
             },
         },
-        'test_service._example_two__timeouts': {
+        'test_service.__example__two___timeouts': {
             'default_servers': [],
             'use_previous_backends': False,
             'discovery': {
@@ -397,7 +397,7 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts(mock_get_
                     # Note: tarpit options don't work for per-endpoint backends
                 ],
                 'server_options': 'check port 6666 observe layer7 maxconn 50 maxqueue 10',
-                'backend_name': 'test_service._example_two__timeouts',
+                'backend_name': 'test_service.__example__two___timeouts',
             },
         },
     }
@@ -495,12 +495,12 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts_with_defa
                     'option httplog',
                     'bind /var/run/synapse/sockets/test_service.sock',
                     'bind /var/run/synapse/sockets/test_service.prxy accept-proxy',
-                    'acl test_service._example_endpoint_timeouts_path path_beg /example/endpoint',
-                    'acl test_service._example_endpoint_timeouts_has_connslots connslots(test_service._example_endpoint_timeouts) gt 0',
-                    'use_backend test_service._example_endpoint_timeouts if test_service._example_endpoint_timeouts_has_connslots test_service._example_endpoint_timeouts_path',
-                    'acl test_service._example_two__timeouts_path path_beg /example/two/',
-                    'acl test_service._example_two__timeouts_has_connslots connslots(test_service._example_two__timeouts) gt 0',
-                    'use_backend test_service._example_two__timeouts if test_service._example_two__timeouts_has_connslots test_service._example_two__timeouts_path',
+                    'acl test_service.__example__endpoint_timeouts_path path_beg /example/endpoint',
+                    'acl test_service.__example__endpoint_timeouts_has_connslots connslots(test_service.__example__endpoint_timeouts) gt 0',
+                    'use_backend test_service.__example__endpoint_timeouts if test_service.__example__endpoint_timeouts_has_connslots test_service.__example__endpoint_timeouts_path',
+                    'acl test_service.__example__two___timeouts_path path_beg /example/two/',
+                    'acl test_service.__example__two___timeouts_has_connslots connslots(test_service.__example__two___timeouts) gt 0',
+                    'use_backend test_service.__example__two___timeouts if test_service.__example__two___timeouts_has_connslots test_service.__example__two___timeouts_path',
                     'acl test_service_has_connslots connslots(test_service) gt 0',
                     'use_backend test_service if test_service_has_connslots',
                 ],
@@ -519,7 +519,7 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts_with_defa
                 'backend_name': 'test_service',
             },
         },
-        'test_service._example_endpoint_timeouts': {
+        'test_service.__example__endpoint_timeouts': {
             'default_servers': [],
             'use_previous_backends': False,
             'discovery': {
@@ -547,10 +547,10 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts_with_defa
                     # Note: tarpit options don't work for per-endpoint backends
                 ],
                 'server_options': 'check port 6666 observe layer7 maxconn 50 maxqueue 10',
-                'backend_name': 'test_service._example_endpoint_timeouts',
+                'backend_name': 'test_service.__example__endpoint_timeouts',
             },
         },
-        'test_service._example_two__timeouts': {
+        'test_service.__example__two___timeouts': {
             'default_servers': [],
             'use_previous_backends': False,
             'discovery': {
@@ -578,7 +578,7 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts_with_defa
                     # Note: tarpit options don't work for per-endpoint backends
                 ],
                 'server_options': 'check port 6666 observe layer7 maxconn 50 maxqueue 10',
-                'backend_name': 'test_service._example_two__timeouts',
+                'backend_name': 'test_service.__example__two___timeouts',
             },
         },
     }

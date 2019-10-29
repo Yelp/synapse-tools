@@ -461,7 +461,7 @@ def generate_base_config(
 
 
 def _endpoint_name_haproxy(endpoint: str) -> str:
-    return endpoint.replace("/", "_")
+    return endpoint.replace("/", "__")
 
 
 def get_backend_name(

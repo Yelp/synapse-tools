@@ -235,9 +235,9 @@ class TestGroupOne(object):
             'service_three_chaos.main',
             'service_two.main',
             'service_three.logging',
-            'service_three_endpoint_timeout.main._example_endpoint_timeouts',
+            'service_three_endpoint_timeout.main.__example__endpoint_timeouts',
             'service_three_endpoint_timeout.main',
-            'service_three_endpoint_timeout.main.region._example_endpoint_timeouts',
+            'service_three_endpoint_timeout.main.region.__example__endpoint_timeouts',
             'service_three_endpoint_timeout.main.region',
         ]
 
