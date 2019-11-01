@@ -18,7 +18,6 @@ from typing import Mapping
 from typing import Optional
 from typing import Tuple
 from typing import Iterable
-from typing import Union
 from typing_extensions import Final
 from mypy_extensions import TypedDict
 
