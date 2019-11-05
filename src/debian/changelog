@@ -1,3 +1,12 @@
+synapse-tools (0.14.0) xenial; urgency=medium
+
+  * Add per endpoint timeout support (#76)  Add per-endpoint timeouts.
+    This allows the following to be added to a namespace in
+    smartstack.yaml: ``` endpoint_timeouts:   "/endpoint/one": 1000
+    "/endpoint/two": 200 ```
+
+ -- Matthew Bentley <bentley@yelp.com>  Tue, 05 Nov 2019 14:47:28 -0800
+
 synapse-tools (0.13.33) xenial; urgency=medium
 
   * add service to ip maapping for k8s services (#75)  add service to ip
