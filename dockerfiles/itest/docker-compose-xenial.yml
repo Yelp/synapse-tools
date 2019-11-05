@@ -11,6 +11,10 @@ itest:
    - xenialservicethreechaos
    - xenialserviceone
    - xenialzookeeper
+   - xenialservicethree_endpoint_timeout
+
+xenialservicethree_endpoint_timeout:
+  build: ../../dockerfiles/itest/service_three
 
 xenialservicethree:
   build: ../../dockerfiles/itest/service_three

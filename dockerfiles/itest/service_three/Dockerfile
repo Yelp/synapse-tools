@@ -10,6 +10,8 @@ EXPOSE 6666
 EXPOSE 1024
 WORKDIR /tmp
 RUN echo 'OK' > my_healthcheck_endpoint
+RUN mkdir example
+RUN echo 'OK' > example/endpoint
 
 # Run hacheck in background and dummy service in foreground
 CMD /usr/local/bin/hacheck -p 6666 & python -m SimpleHTTPServer 1024

@@ -11,6 +11,10 @@ itest:
    - trustyservicethreechaos
    - trustyserviceone
    - trustyzookeeper
+   - trustyservicethree_endpoint_timeout
+
+trustyservicethree_endpoint_timeout:
+  build: ../../dockerfiles/itest/service_three
 
 trustyservicethree:
   build: ../../dockerfiles/itest/service_three
