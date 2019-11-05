@@ -461,7 +461,7 @@ def generate_base_config(
     return base_config
 
 
-def _endpoint_name_haproxy(endpoint: str) -> str:
+def sanitize_endpoint_name(endpoint: str) -> str:
     return endpoint.replace("/", "__")
 
 
@@ -477,7 +477,7 @@ def get_backend_name(
     from before adding per-endpoint timeouts.
     """
     if endpoint_name != HAPROXY_DEFAULT_SECTION:
-        endpoint_name_haproxy = _endpoint_name_haproxy(endpoint_name)
+        endpoint_name_haproxy = sanitize_endpoint_name(endpoint_name)
         endpoint_ext = f".{endpoint_name_haproxy}_timeouts"
     else:
         endpoint_ext = ""
