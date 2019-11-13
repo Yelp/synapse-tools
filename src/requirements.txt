@@ -6,7 +6,7 @@ plumbum==1.6.0
 psutil==2.1.1
 PyYAML==4.2b1
 pyroute2==0.3.4
-paasta-tools==0.81.26
+paasta-tools==0.90.4
 protobuf==2.6.1
 setuptools==37.0.0
 tox-pip-extensions==1.1.0
