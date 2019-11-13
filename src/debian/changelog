@@ -1,3 +1,9 @@
+synapse-tools (0.14.1) xenial; urgency=medium
+
+  * Bump paasta to 0.90.4 (#77)
+
+ -- Maksym Melnychok <maksym@yelp.com>  Wed, 13 Nov 2019 02:44:24 -0800
+
 synapse-tools (0.14.0) xenial; urgency=medium
 
   * Add per endpoint timeout support (#76)  Add per-endpoint timeouts.
