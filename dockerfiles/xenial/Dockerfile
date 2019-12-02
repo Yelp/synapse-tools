@@ -15,7 +15,6 @@ RUN apt-get update && apt-get -y install \
     python-setuptools \
     libffi-dev \
     libssl-dev \
-    libzookeeper-mt-dev \
     build-essential \
     protobuf-compiler \
     gdebi-core \

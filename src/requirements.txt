@@ -2,6 +2,7 @@ argparse==1.2.1
 requests==2.22.0
 dulwich==0.19.5
 environment_tools==1.1.0
+pymesos==0.3.9
 plumbum==1.6.0
 psutil==2.1.1
 PyYAML==4.2b1
