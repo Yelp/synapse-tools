@@ -545,9 +545,15 @@ def generate_acls_for_service(
         # non-default backends have an extra ACL to match the path
         if endpoint_name != HAPROXY_DEFAULT_SECTION:
             path = endpoint_name
+            # There is no reason to prefix-match on "/"
+            #  special case it for now to support overriding the timeout for "/"
+            if path == "/":
+                acl_type = "path"
+            else:
+                acl_type = "path_beg"
             # note: intentional " " in the beginning of this string
             path_acl_name = f' {backend_identifier}_path'
-            path_acl = [f'acl{path_acl_name} path_beg {path}']
+            path_acl = [f'acl{path_acl_name} {acl_type} {path}']
         else:
             path_acl_name = ''
             path_acl = []

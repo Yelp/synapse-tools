@@ -243,6 +243,7 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts(mock_get_
                     'advertise': ['region'],
                     'discover': 'region',
                     'endpoint_timeouts': {
+                        '/': 200,
                         '/example/endpoint': 10000,
                         '/example/two/': 100,
                     }
@@ -271,6 +272,7 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts(mock_get_
                     },
                     'balance': 'roundrobin',
                     'endpoint_timeouts': {
+                        '/': 200,
                         '/example/endpoint': 10000,
                         '/example/two/': 100,
                     }
@@ -310,6 +312,9 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts(mock_get_
                     'option httplog',
                     'bind /var/run/synapse/sockets/test_service.sock',
                     'bind /var/run/synapse/sockets/test_service.prxy accept-proxy',
+                    'acl test_service.___timeouts_path path /',
+                    'acl test_service.___timeouts_has_connslots connslots(test_service.___timeouts) gt 0',
+                    'use_backend test_service.___timeouts if test_service.___timeouts_has_connslots test_service.___timeouts_path',
                     'acl test_service.__example__endpoint_timeouts_path path_beg /example/endpoint',
                     'acl test_service.__example__endpoint_timeouts_has_connslots connslots(test_service.__example__endpoint_timeouts) gt 0',
                     'use_backend test_service.__example__endpoint_timeouts if test_service.__example__endpoint_timeouts_has_connslots test_service.__example__endpoint_timeouts_path',
@@ -335,6 +340,37 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts(mock_get_
                 'server_options': 'check port 6666 observe layer7 maxconn 50 maxqueue 10',
                 'backend_name': 'test_service',
             },
+        },
+        'test_service.___timeouts': {
+            'default_servers': [],
+            'discovery': {
+                'hosts': ['1.2.3.4', '2.3.4.5'],
+                'method': 'zookeeper',
+                'path': '/smartstack/global/test_service',
+                'label_filters': [
+                    {
+                        'label': 'region:my_region',
+                        'value': '',
+                        'condition': 'equals',
+                    },
+                ],
+            },
+            'haproxy': {
+                'listen': [],
+                'backend': [
+                    'balance roundrobin',
+                    'reqidel ^X-Mode:.*',
+                    'reqadd X-Mode:\\ ro',
+                    'option httpchk GET /http/test_service/0/status HTTP/1.1\\r\\nX-Mode:\\ ro',
+                    'http-check send-state',
+                    'retries 3',
+                    'timeout connect 2000ms',
+                    'timeout server 200ms',
+                ],
+                'server_options': 'check port 6666 observe layer7 maxconn 50 maxqueue 10',
+                'backend_name': 'test_service.___timeouts',
+            },
+            'use_previous_backends': False,
         },
         'test_service.__example__endpoint_timeouts': {
             'default_servers': [],
