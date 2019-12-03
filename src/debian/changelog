@@ -1,3 +1,10 @@
+synapse-tools (0.14.2) xenial; urgency=medium
+
+  * Merge pull request #78 from Yelp/special_case_root  Special case per-
+    endpoint timeouts for "/" to do full string match
+
+ -- Matthew Bentley <bentley@yelp.com>  Tue, 03 Dec 2019 15:17:04 -0800
+
 synapse-tools (0.14.1) xenial; urgency=medium
 
   * Bump paasta to 0.90.4 (#77)
