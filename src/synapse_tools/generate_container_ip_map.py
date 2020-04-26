@@ -65,11 +65,11 @@ def extract_taskid_and_ip(
 
     for pod in node_info['items']:
         labels = pod['metadata']['labels']
-        if 'yelp.com/paasta_service' in labels and \
-           'yelp.com/paasta_instance' in labels and \
+        service = labels.get('paasta.yelp.com/service')
+        instance = labels.get('paasta.yelp.com/instance')
+        if service is not None and \
+           instance is not None and \
            'podIP' in pod['status']:
-            service = labels['yelp.com/paasta_service']
-            instance = labels['yelp.com/paasta_instance']
             task_id = f'{service}.{instance}'.replace('_', '--')
             pod_ip = pod['status']['podIP']
             service_ips_and_ids.append((pod_ip, task_id))
