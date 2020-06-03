@@ -67,8 +67,11 @@ def extract_taskid_and_ip(
         labels = pod['metadata']['labels']
         service = labels.get('paasta.yelp.com/service')
         instance = labels.get('paasta.yelp.com/instance')
+        status = pod['status'].get('phase')
+
         if service is not None and \
            instance is not None and \
+           status != 'Failed' and \
            'podIP' in pod['status']:
             task_id = f'{service}.{instance}'.replace('_', '--')
             pod_ip = pod['status']['podIP']
