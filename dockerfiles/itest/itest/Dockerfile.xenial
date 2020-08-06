@@ -27,11 +27,12 @@ RUN apt-get update && apt-get -y install \
     nginx \
     liblua5.3-dev \
     libssl-dev \
+    wget \
     rsyslog
 
 # HAProxy configured with Lua scripting
 WORKDIR /
-ADD http://www.haproxy.org/download/1.7/src/haproxy-1.7.8.tar.gz /haproxy.tar.gz
+RUN wget http://www.haproxy.org/download/1.7/src/haproxy-1.7.8.tar.gz -O /haproxy.tar.gz
 RUN tar -axvf /haproxy.tar.gz
 WORKDIR /haproxy-1.7.8
 RUN make TARGET=linux26 \
