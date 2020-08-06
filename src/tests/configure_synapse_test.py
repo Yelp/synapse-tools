@@ -1,9 +1,19 @@
 import contextlib
+import json
+import os
+import subprocess
 
 import mock
 import pytest
+import yaml
 
 from synapse_tools import configure_synapse
+
+
+STATUS_QUO_ENVOY_MIGRATION_CONFIG = {
+    'migration_enabled': False,
+    'namespaces': {},
+}
 
 
 @pytest.yield_fixture
@@ -75,7 +85,8 @@ def test_generate_configuration(mock_get_current_location, mock_available_locati
                     'discover': 'region',
                 }
             )
-        ]
+        ],
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
 
     actual_configuration_reversed_advertise = configure_synapse.generate_configuration(
@@ -101,7 +112,8 @@ def test_generate_configuration(mock_get_current_location, mock_available_locati
                     'discover': 'region',
                 }
             )
-        ]
+        ],
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
 
     expected_configuration = configure_synapse.generate_base_config(
@@ -213,7 +225,8 @@ def test_generate_configuration_with_errorfiles(mock_get_current_location, mock_
     actual_configuration = configure_synapse.generate_configuration(
         synapse_tools_config=synapse_tools_config,
         zookeeper_topology=['1.2.3.4', '2.3.4.5'],
-        services=[]
+        services=[],
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
 
     assert 'errorfile 404 /etc/haproxy-synapse/errors/404.http' in actual_configuration['haproxy']['defaults']
@@ -249,7 +262,8 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts(mock_get_
                     }
                 }
             )
-        ]
+        ],
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
 
     actual_configuration_default_advertise = configure_synapse.generate_configuration(
@@ -278,7 +292,8 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts(mock_get_
                     }
                 }
             )
-        ]
+        ],
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
 
     expected_configuration = configure_synapse.generate_base_config(
@@ -472,7 +487,8 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts_with_defa
                     }
                 }
             )
-        ]
+        ],
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
 
     actual_configuration_default_advertise = configure_synapse.generate_configuration(
@@ -498,7 +514,8 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts_with_defa
                     }
                 }
             )
-        ]
+        ],
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
 
     expected_configuration = configure_synapse.generate_base_config(
@@ -651,7 +668,8 @@ def test_generate_configuration_single_advertise(mock_get_current_location, mock
                     'discover': 'region',
                 }
             )
-        ]
+        ],
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
 
     actual_configuration_default_advertise = configure_synapse.generate_configuration(
@@ -675,7 +693,8 @@ def test_generate_configuration_single_advertise(mock_get_current_location, mock
                     'balance': 'roundrobin',
                 }
             )
-        ]
+        ],
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
 
     expected_configuration = configure_synapse.generate_base_config(
@@ -743,7 +762,8 @@ def test_generate_configuration_empty(mock_available_location_types):
     actual_configuration = configure_synapse.generate_configuration(
         synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'}),
         zookeeper_topology=['1.2.3.4', '2.3.4.5'],
-        services=[]
+        services=[],
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
     expected_configuration = configure_synapse.generate_base_config(
         synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'})
@@ -786,7 +806,8 @@ def test_generate_configuration_with_proxied_through(mock_get_current_location, 
                     'is_proxy': True,
                 }
             )
-        ]
+        ],
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
 
     expected_configuration = configure_synapse.generate_base_config(
@@ -926,7 +947,8 @@ def test_generate_configuration_with_nginx(mock_get_current_location, mock_avail
                     'discover': 'region',
                 }
             )
-        ]
+        ],
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
 
     expected_configuration = configure_synapse.generate_base_config(
@@ -1075,7 +1097,8 @@ def test_generate_configuration_only_nginx(mock_get_current_location, mock_avail
                     'discover': 'region',
                 }
             )
-        ]
+        ],
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
 
     expected_configuration = configure_synapse.generate_base_config(
@@ -1223,7 +1246,8 @@ def test_generate_configuration_with_source_required_plugin(mock_get_current_loc
                     },
                 }
             ),
-        ]
+        ],
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
 
     expected_configuration = configure_synapse.generate_base_config(
@@ -1335,7 +1359,8 @@ def test_generate_configuration_with_logging_plugin(mock_get_current_location, m
                     }
                 }
             )
-        ]
+        ],
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
 
     expected_configuration = configure_synapse.generate_base_config(
@@ -1505,7 +1530,8 @@ def test_generate_configuration_with_multiple_plugins(mock_get_current_location,
                     }
                 }
             )
-        ]
+        ],
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
 
     expected_configuration = configure_synapse.generate_base_config(
@@ -1631,69 +1657,154 @@ def test_generate_configuration_with_multiple_plugins(mock_get_current_location,
     assert 'lua-load' and 'path_based_routing' in actual_global[-1]
 
 
-@contextlib.contextmanager
-def setup_mocks_for_main():
-    mock_tmp_file = mock.MagicMock()
-    mock_file_cmp = mock.Mock()
-    mock_copy = mock.Mock()
-    mock_subprocess_check_call = mock.Mock()
-
-    patchers = [
-        mock.patch('synapse_tools.configure_synapse.get_zookeeper_topology'),
-        mock.patch('synapse_tools.configure_synapse.get_all_namespaces'),
-        mock.patch('synapse_tools.configure_synapse.generate_configuration'),
-        mock.patch(
-            'synapse_tools.configure_synapse.get_config',
-            return_value=configure_synapse.set_defaults(
-                {'bind_addr': '0.0.0.0', 'config_file': '/etc/synapse/synapse.conf.json'}
+def test_generate_configuration_envoy_migration_enabled(mock_get_current_location, mock_available_location_types):
+    """When envoy migration is enabled and a namespace is envoy-only, we shouldn't load balance it."""
+    config = configure_synapse.generate_configuration(
+        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'}),
+        zookeeper_topology=['1.2.3.4', '2.3.4.5'],
+        services=[
+            (
+                'service_1',
+                {
+                    'proxy_port': 1111,
+                    'advertise': ['region'],
+                    'discover': 'region',
+                }
             ),
-        ),
-        mock.patch('tempfile.NamedTemporaryFile', return_value=mock_tmp_file),
-        mock.patch('synapse_tools.configure_synapse.open', create=True),
-        mock.patch('json.dump'),
-        mock.patch('os.chmod'),
-        mock.patch('filecmp.cmp', mock_file_cmp),
-        mock.patch('shutil.copy', mock_copy),
-        mock.patch('subprocess.check_call', mock_subprocess_check_call),
+            (
+                'service_2',
+                {
+                    'proxy_port': 2222,
+                    'advertise': ['region'],
+                    'discover': 'region',
+                }
+            ),
+            (
+                'service_3',
+                {
+                    'proxy_port': 3333,
+                    'advertise': ['region'],
+                    'discover': 'region',
+                }
+            ),
+            (
+                'service_4',
+                {
+                    'proxy_port': 4444,
+                    'advertise': ['region'],
+                    'discover': 'region',
+                }
+            ),
+        ],
+        envoy_migration_config={
+            'migration_enabled': True,
+            'namespaces': {
+                # service_1 intentionally omitted to test that the default is "synapse" mode.
+                'service_2': {'state': 'synapse'},
+                'service_3': {'state': 'dual'},
+                'service_4': {'state': 'envoy'},
+            },
+        },
+    )
+    # service_1 isn't in the namespace config, so defaults to enabled.
+    assert config['services']['service_1']['haproxy']['port'] == '1111'
+    # service_2 is in "synapse" mode, so is enabled.
+    assert config['services']['service_2']['haproxy']['port'] == '2222'
+    # service_3 is in "dual" mode, so is enabled.
+    assert config['services']['service_3']['haproxy']['port'] == '3333'
+    # service_4 is in "envoy" mode, so proxying is disabled completely.
+    assert config['services']['service_4']['haproxy'] == {'disabled': True}
+
+
+def test_generate_configuration_envoy_migration_disabled(mock_get_current_location, mock_available_location_types):
+    """When envoy migration is disabled, even namespaces in envoy-only mode still use haproxy."""
+    config = configure_synapse.generate_configuration(
+        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'}),
+        zookeeper_topology=['1.2.3.4', '2.3.4.5'],
+        services=[
+            (
+                'my_service',
+                {
+                    'proxy_port': 1111,
+                    'advertise': ['region'],
+                    'discover': 'region',
+                }
+            ),
+        ],
+        envoy_migration_config={
+            'migration_enabled': False,
+            'namespaces': {
+                'my_service': {'state': 'envoy'},
+            },
+        },
+    )
+    assert 'disabled' not in config['services']['my_service']
+    assert config['services']['my_service']['haproxy']['port'] == '1111'
+
+
+@contextlib.contextmanager
+def setup_mocks_for_main(tmpdir, config_file_path):
+    """Write out config files and mock enough functions to run main()."""
+    synapse_tools_config = tmpdir.join('synapse-tools.conf.json')
+    synapse_tools_config.write(json.dumps({
+        'config_file': config_file_path,
+    }))
+
+    envoy_migration_config = tmpdir.join('envoy_migration.yaml')
+    envoy_migration_config.write(yaml.safe_dump(STATUS_QUO_ENVOY_MIGRATION_CONFIG))
+
+    with mock.patch.dict(
+        os.environ,
+        {
+            'SYNAPSE_TOOLS_CONFIG_PATH': synapse_tools_config.strpath,
+            'ENVOY_MIGRATION_CONFIG_PATH': envoy_migration_config.strpath,
+        },
+        clear=True,
+    ), mock.patch.object(
+        configure_synapse, 'generate_configuration', autospec=True,
+    ) as mock_generate_configuration, mock.patch.object(
+        configure_synapse, 'get_zookeeper_topology', autospec=True,
+    ), mock.patch.object(
+        configure_synapse, 'get_all_namespaces', autospec=True,
+    ), mock.patch.object(
+        subprocess, 'check_call', autospec=True,
+    ) as mock_subprocess_check_call:
+        yield mock_subprocess_check_call, mock_generate_configuration
+
+
+def test_synapse_restarted_when_config_files_differ(tmpdir):
+    config_path = tmpdir.join('synapse.conf.json')
+    config_path.write('{\n    "some": "config"\n}')
+
+    with setup_mocks_for_main(
+        tmpdir, config_path.strpath,
+    ) as (mock_subprocess_check_call, mock_generate_configuration):
+        mock_generate_configuration.return_value = {'some': 'new config'}
+        configure_synapse.main()
+
+    # The synapse config file on disk should have been modified.
+    assert config_path.read() == '{\n    "some": "new config"\n}'
+    # synapse should have been reloaded.
+    assert mock_subprocess_check_call.mock_calls == [
+        mock.call(['service', 'synapse', 'stop']),
+        mock.call(['service', 'synapse', 'start'])
     ]
 
-    with contextlib.ExitStack() as stack:
-        [stack.enter_context(patch) for patch in patchers]
-        yield(mock_tmp_file, mock_file_cmp, mock_copy, mock_subprocess_check_call)
 
+def test_synapse_not_restarted_when_config_files_are_identical(tmpdir):
+    config_path = tmpdir.join('synapse.conf.json')
+    config_path.write('{\n    "some": "config"\n}')
 
-def test_synapse_restarted_when_config_files_differ():
-    with setup_mocks_for_main() as (
-            mock_tmp_file, mock_file_cmp, mock_copy, mock_subprocess_check_call):
-
-        # New and existing synapse configs differ
-        mock_file_cmp.return_value = False
-
+    with setup_mocks_for_main(
+        tmpdir, config_path.strpath,
+    ) as (mock_subprocess_check_call, mock_generate_configuration):
+        mock_generate_configuration.return_value = {'some': 'config'}
         configure_synapse.main()
 
-        mock_copy.assert_called_with(
-            mock_tmp_file.__enter__().name, '/etc/synapse/synapse.conf.json')
-
-        expected_calls = [
-            mock.call(['service', 'synapse', 'stop']),
-            mock.call(['service', 'synapse', 'start'])
-        ]
-
-        assert mock_subprocess_check_call.call_args_list == expected_calls
-
-
-def test_synapse_not_restarted_when_config_files_are_identical():
-    with setup_mocks_for_main() as (
-            mock_tmp_file, mock_file_cmp, mock_copy, mock_subprocess_check_call):
-
-        # New and existing synapse configs are identical
-        mock_file_cmp.return_value = True
-
-        configure_synapse.main()
-
-        mock_copy.assert_called_with(
-            mock_tmp_file.__enter__().name, '/etc/synapse/synapse.conf.json')
-        assert not mock_subprocess_check_call.called
+    # The synapse config file on disk should not have been modified.
+    assert config_path.read() == '{\n    "some": "config"\n}'
+    # synapse should not have been reloaded.
+    assert mock_subprocess_check_call.called is False
 
 
 def test_chaos_delay(mock_get_current_location, mock_available_location_types):
@@ -1710,7 +1821,8 @@ def test_chaos_delay(mock_get_current_location, mock_available_location_types):
                         'chaos': {'ecosystem': {'my_ecosystem': {'delay': '300ms'}}}
                     }
                 )
-            ]
+            ],
+            envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
         )
         grouping_mock.assert_called_once_with('ecosystem')
     frontend = actual_configuration['services']['test_service']['haproxy']['frontend']
@@ -1732,7 +1844,8 @@ def test_chaos_drop(mock_get_current_location, mock_available_location_types):
                         'chaos': {'ecosystem': {'my_ecosystem': {'fail': 'drop'}}}
                     }
                 )
-            ]
+            ],
+            envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
         )
         grouping_mock.assert_called_once_with('ecosystem')
     frontend = actual_configuration['services']['test_service']['haproxy']['frontend']
@@ -1753,7 +1866,8 @@ def test_chaos_error_503(mock_get_current_location, mock_available_location_type
                         'chaos': {'ecosystem': {'my_ecosystem': {'fail': 'error_503'}}}
                     }
                 )
-            ]
+            ],
+            envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
         )
         assert actual_configuration['services']['test_service']['discovery']['method'] == 'base'
 
@@ -1787,7 +1901,8 @@ def test_discovery_only_services(mock_get_current_location, mock_available_locat
                     'discover': 'region',
                 }
             )
-        ]
+        ],
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
 
     expected_configuration = configure_synapse.generate_base_config(
@@ -1853,7 +1968,8 @@ def test_nginx_no_proxy_proto(mock_get_current_location, mock_available_location
         zookeeper_topology=['1.2.3.4', '2.3.4.5'],
         services=[
             ('test_service', {'proxy_port': 1234}),
-        ]
+        ],
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
 
     # Check HAProxy binds on both PROXY protocol and regular TCP unix sockets
@@ -1877,7 +1993,8 @@ def test_nginx_proxy_proto(mock_get_current_location, mock_available_location_ty
         zookeeper_topology=['1.2.3.4', '2.3.4.5'],
         services=[
             ('test_service', {'proxy_port': 1234}),
-        ]
+        ],
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
 
     # Check HAProxy binds on both PROXY protocol and regular TCP unix sockets
