@@ -1,6 +1,8 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
 
+PIP_INDEX_URL ?= https://pypi.yelpcorp.com/simple
+
 export DH_VIRTUALENV_INSTALL_ROOT=/opt/venvs
 
 export DH_OPTIONS
@@ -20,7 +22,7 @@ override_dh_auto_test:
 	true
 
 override_dh_virtualenv:
-	dh_virtualenv `host pypi.yelpcorp.com >/dev/null 2>&1 && echo '--extra-index-url https://pypi.yelpcorp.com/simple'` \
+	dh_virtualenv -i $(PIP_INDEX_URL) \
 	--python=/usr/bin/python3.6 --preinstall no-manylinux1 \
 	--preinstall pip==19.3.1 \
 	--preinstall pip-custom-platform --pip-tool pip-custom-platform

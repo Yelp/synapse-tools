@@ -1,3 +1,4 @@
+export PIP_INDEX_URL ?= https://pypi.yelpcorp.com/simple
 DATE := $(shell date +'%Y-%m-%d')
 SYNAPSETOOLSVERSION := $(shell sed 's/.*(\(.*\)).*/\1/;q' src/debian/changelog)
 
