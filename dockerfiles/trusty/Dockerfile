@@ -1,5 +1,8 @@
 FROM ubuntu:14.04
 
+ARG PIP_INDEX_URL=https://pypi.yelpcorp.com/simple
+ENV PIP_INDEX_URL=$PIP_INDEX_URL
+
 RUN rm -f /etc/apt/sources.list.d/proposed.list
 
 # Older versions of dh-virtualenv are buggy and don't.. work
