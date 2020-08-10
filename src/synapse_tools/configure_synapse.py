@@ -603,7 +603,7 @@ def generate_configuration(
         # files).
         if (
             envoy_migration_config['migration_enabled'] and
-            envoy_migration_config['namespaces'].get(service_name, {}).get('state') == 'envoy'
+            envoy_migration_config['namespaces'].get(service_name, {'state': 'synapse'}).get('state') == 'envoy'
         ):
             proxy_port = None
 
@@ -1070,7 +1070,7 @@ def get_my_grouping(grouping_type: str) -> str:
 
 def get_envoy_migration_config(path: str) -> EnvoyMigrationConfig:
     with open(path) as f:
-        return yaml.load(f, Loader=yaml.CSafeLoader)
+        return yaml.load(f, Loader=yaml.CSafeLoader)  # type: ignore
 
 
 def main() -> None:
