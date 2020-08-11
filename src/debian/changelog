@@ -1,3 +1,10 @@
+synapse-tools (0.15.0) xenial; urgency=medium
+
+  * Add Envoy migration toggles to allow disabling haproxy on a per-namespace
+    basis (https://github.com/Yelp/synapse-tools/pull/86).
+
+ -- Chris Kuehl <ckuehl@yelp.com>  Tue, 11 Aug 2020 11:27:57 -0700
+
 synapse-tools (0.14.3) xenial; urgency=medium
 
   * Merge pull request #83 from Yelp/u/dpopes/COMPINFRA-343-only-
