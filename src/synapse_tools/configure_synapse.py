@@ -65,6 +65,15 @@ class NginxTopLevelConfig(TypedDict):
     listen_address: str
 
 
+class EnvoyMigrationNamespaceConfig(TypedDict):
+    state: str
+
+
+class EnvoyMigrationConfig(TypedDict):
+    migration_enabled: bool
+    namespaces: Mapping[str, EnvoyMigrationNamespaceConfig]
+
+
 HAProxyTopLevelConfigExtraSections = TypedDict(
     'HAProxyTopLevelConfigExtraSections',
     {
@@ -572,6 +581,7 @@ def generate_configuration(
     synapse_tools_config: SynapseToolsConfig,
     zookeeper_topology: Iterable[str],
     services: Iterable[Tuple[str, ServiceNamespaceConfig]],
+    envoy_migration_config: EnvoyMigrationConfig,
 ) -> BaseConfig:
     synapse_config = generate_base_config(synapse_tools_config)
     available_locations = available_location_types()
@@ -587,10 +597,19 @@ def generate_configuration(
         # then we know that the service does not want to be in SmartStack
         if proxy_port is not None and proxy_port < 0:
             continue
+
+        # When the migration to Envoy is enabled and this namespace is marked
+        # as Envoy-only, skip setting up load balancing (but keep the discovery
+        # files).
+        if (
+            envoy_migration_config['migration_enabled'] and
+            envoy_migration_config['namespaces'].get(service_name, {'state': 'synapse'}).get('state') == 'envoy'
+        ):
+            proxy_port = None
+
         # Note that at this point proxy_port can be:
         # * valid number: Wants Load balancing (HAProxy/Nginx)
         # * None: Wants discovery, but no load balancing (files)
-
         discover_type = service_info.get('discover', 'region')
         advertise_types = sorted(
             [
@@ -1049,6 +1068,11 @@ def get_my_grouping(grouping_type: str) -> str:
         return fd.read().strip()
 
 
+def get_envoy_migration_config(path: str) -> EnvoyMigrationConfig:
+    with open(path) as f:
+        return yaml.load(f, Loader=yaml.CSafeLoader)  # type: ignore
+
+
 def main() -> None:
     my_config = get_config(
         os.environ.get(
@@ -1067,6 +1091,10 @@ def main() -> None:
             my_config['zookeeper_topology_path']
         ),
         get_all_namespaces(soa_dir),
+        get_envoy_migration_config(os.environ.get(
+            'ENVOY_MIGRATION_CONFIG_PATH',
+            '/nail/srv/configs/service_mesh/envoy_migration.yaml',
+        )),
     )
 
     with tempfile.NamedTemporaryFile() as tmp_file:
