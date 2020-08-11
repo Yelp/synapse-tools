@@ -87,6 +87,7 @@ RUN mkdir -p /nail/etc/zookeeper_discovery/infrastructure
 ADD zookeeper_discovery/infrastructure/local.yaml.trusty /nail/etc/zookeeper_discovery/infrastructure/local.yaml
 
 ADD yelpsoa-configs /nail/etc/services
+ADD srv-configs /nail/srv/configs
 ADD habitat /nail/etc/habitat
 ADD ecosystem /nail/etc/ecosystem
 ADD region /nail/etc/region
