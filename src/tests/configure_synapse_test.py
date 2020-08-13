@@ -1660,7 +1660,11 @@ def test_generate_configuration_with_multiple_plugins(mock_get_current_location,
 def test_generate_configuration_envoy_migration_enabled(mock_get_current_location, mock_available_location_types):
     """When envoy migration is enabled and a namespace is envoy-only, we shouldn't load balance it."""
     config = configure_synapse.generate_configuration(
-        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'}),
+        synapse_tools_config=configure_synapse.set_defaults({
+            'bind_addr': '0.0.0.0',
+            'listen_with_nginx': True,
+            'listen_with_haproxy': False,
+        }),
         zookeeper_topology=['1.2.3.4', '2.3.4.5'],
         services=[
             (
@@ -1707,13 +1711,15 @@ def test_generate_configuration_envoy_migration_enabled(mock_get_current_locatio
         },
     )
     # service_1 isn't in the namespace config, so defaults to enabled.
-    assert config['services']['service_1']['haproxy']['port'] == '1111'
+    assert config['services']['service_1.nginx_listener']['nginx']['port'] == 1111
     # service_2 is in "synapse" mode, so is enabled.
-    assert config['services']['service_2']['haproxy']['port'] == '2222'
+    assert config['services']['service_2.nginx_listener']['nginx']['port'] == 2222
     # service_3 is in "dual" mode, so is enabled.
-    assert config['services']['service_3']['haproxy']['port'] == '3333'
-    # service_4 is in "envoy" mode, so proxying is disabled completely.
-    assert config['services']['service_4']['haproxy'] == {'disabled': True}
+    assert config['services']['service_3.nginx_listener']['nginx']['port'] == 3333
+    # service_4 is in "envoy" mode, so the nginx listener is gone but the
+    # haproxy backend remains.
+    assert 'service_4.nginx_listener' not in config['services']
+    assert config['services']['service_4']['haproxy']['bind_address'] == '/var/run/synapse/sockets/service_4.sock'
 
 
 def test_generate_configuration_envoy_migration_disabled(mock_get_current_location, mock_available_location_types):
