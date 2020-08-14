@@ -1,3 +1,11 @@
+synapse-tools (0.15.1) xenial; urgency=medium
+
+  * Don't tear down the haproxy listener when Envoy is disabled for a
+    namespace; only tear down the nginx one.
+    https://github.com/Yelp/synapse-tools/pull/88
+
+ -- Chris Kuehl <ckuehl@yelp.com>  Fri, 14 Aug 2020 11:22:32 -0700
+
 synapse-tools (0.15.0) xenial; urgency=medium
 
   * Add Envoy migration toggles to allow disabling haproxy on a per-namespace
