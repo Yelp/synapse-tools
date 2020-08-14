@@ -27,3 +27,4 @@ src/.cache/
 bintray.json
 *.deb
 .mypy_cache/
+/venv

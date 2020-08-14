@@ -598,14 +598,10 @@ def generate_configuration(
         if proxy_port is not None and proxy_port < 0:
             continue
 
-        # When the migration to Envoy is enabled and this namespace is marked
-        # as Envoy-only, skip setting up load balancing (but keep the discovery
-        # files).
-        if (
+        namespace_is_envoy_only = (
             envoy_migration_config['migration_enabled'] and
             envoy_migration_config['namespaces'].get(service_name, {'state': 'synapse'}).get('state') == 'envoy'
-        ):
-            proxy_port = None
+        )
 
         # Note that at this point proxy_port can be:
         # * valid number: Wants Load balancing (HAProxy/Nginx)
@@ -703,18 +699,23 @@ def generate_configuration(
             synapse_config['services'][backend_identifier] = config
 
         if proxy_port is not None:
-            # If nginx is supported, include a single additional static
-            # service watcher per service that listens on the right port and
-            # proxies back to the unix socket exposed by HAProxy
-            if synapse_tools_config['listen_with_nginx']:
-                listener_name = '{0}.nginx_listener'.format(service_name)
-                synapse_config['services'][listener_name] = (
-                    _generate_nginx_for_watcher(
-                        service_name=service_name,
-                        service_info=cast(ServiceInfo, service_info),
-                        synapse_tools_config=synapse_tools_config,
+            # When the migration to Envoy is enabled and this namespace is marked
+            # as Envoy-only, we still provide discovery via JSON files and set up
+            # the haproxy backend (to avoid a race condition in MESH-931), but
+            # don't configure an nginx listener on the proxy port.
+            if not namespace_is_envoy_only:
+                # If nginx is supported, include a single additional static
+                # service watcher per service that listens on the right port and
+                # proxies back to the unix socket exposed by HAProxy
+                if synapse_tools_config['listen_with_nginx']:
+                    listener_name = '{0}.nginx_listener'.format(service_name)
+                    synapse_config['services'][listener_name] = (
+                        _generate_nginx_for_watcher(
+                            service_name=service_name,
+                            service_info=cast(ServiceInfo, service_info),
+                            synapse_tools_config=synapse_tools_config,
+                        )
                     )
-                )
 
             # Add HAProxy options for plugins
             for plugin_name in PLUGIN_REGISTRY:
