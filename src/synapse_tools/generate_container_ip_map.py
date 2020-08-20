@@ -60,7 +60,7 @@ def extract_taskid_and_ip_mesos(
     return service_ips_and_ids
 
 
-def extract_taskid_and_ip_k8s():
+def extract_taskid_and_ip_k8s() -> Iterable[Tuple[str, str]]:
     service_ips_and_ids = []
 
     node_info = requests.get("http://169.254.255.254:10255/pods/").json()
