@@ -1,3 +1,22 @@
+synapse-tools (0.15.2) xenial; urgency=medium
+
+  * don't write an empty ip map if the kubelet api returns an error
+
+    Part of kubelet's lifecycle involves `systemctl restart` on certain
+    updates.  This makes the local kubelet api unavailable, and the
+    generate
+    ip mapping script will write an empty map file.
+
+    This involves two changes:
+    1. split mesos and k8s instance discovery funtions,
+    since previously the function decided "error from k8s api => we're on a
+    mesos box". Now, a --k8s flag will tell the script to use k8s
+    instance discovery, otherwise it will default to mesos
+    2. do not take any further action if the kubelet api returns an error on
+    a k8s host
+
+ -- Matthew Bentley <bentley@yelp.com>  Thu, 20 Aug 2020 12:41:29 -0700
+
 synapse-tools (0.15.1) xenial; urgency=medium
 
   * Don't tear down the haproxy listener when Envoy is disabled for a
