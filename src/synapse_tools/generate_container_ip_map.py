@@ -2,6 +2,7 @@
 import argparse
 import os
 import socket
+import sys
 import requests
 from typing import Iterable
 from typing import Optional
@@ -31,7 +32,7 @@ def get_prev_file_contents(
     return {}
 
 
-def extract_taskid_and_ip(
+def extract_taskid_and_ip_mesos(
     docker_client: Client,
 ) -> Iterable[Tuple[str, str]]:
     service_ips_and_ids = []
@@ -56,12 +57,13 @@ def extract_taskid_and_ip(
                 task_id = task_id.replace('_', '--')
                 service_ips_and_ids.append((ip_addr, task_id))
 
-    # For kubernetes. If the ec2 instance is not a k8s instance, this will throw an error and be skipped.
-    try:
-        # Get all pod metadata on this node
-        node_info = requests.get("http://169.254.255.254:10255/pods/").json()
-    except Exception:
-        return service_ips_and_ids
+    return service_ips_and_ids
+
+
+def extract_taskid_and_ip_k8s():
+    service_ips_and_ids = []
+
+    node_info = requests.get("http://169.254.255.254:10255/pods/").json()
 
     for pod in node_info['items']:
         labels = pod['metadata']['labels']
@@ -155,6 +157,11 @@ def main() -> None:
         help='Timeout for haproxy socket connections',
     )
     parser.add_argument(
+        '--k8s',
+        action='store_true',
+        help='Use kubernetes api pod extraction rather than default mesos method',
+    )
+    parser.add_argument(
         'map_file',
         nargs='?',
         default='/var/run/synapse/maps/ip_to_service.map',
@@ -167,7 +174,14 @@ def main() -> None:
 
     new_lines = []
     ip_addrs = []
-    service_ips_and_ids = extract_taskid_and_ip(get_docker_client())
+    if args.k8s:
+        try:
+            service_ips_and_ids = extract_taskid_and_ip_k8s()
+        except Exception as e:
+            print(e.message, file=sys.stderr)
+            return
+    else:
+        service_ips_and_ids = extract_taskid_and_ip_mesos(get_docker_client())
 
     for ip_addr, task_id in service_ips_and_ids:
         ip_addrs.append(ip_addr)
