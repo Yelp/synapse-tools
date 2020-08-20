@@ -178,7 +178,7 @@ def main() -> None:
         try:
             service_ips_and_ids = extract_taskid_and_ip_k8s()
         except Exception as e:
-            print(e.message, file=sys.stderr)
+            print(e, file=sys.stderr)
             return
     else:
         service_ips_and_ids = extract_taskid_and_ip_mesos(get_docker_client())
