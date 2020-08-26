@@ -1,3 +1,9 @@
+synapse-tools (0.15.3) xenial; urgency=medium
+
+  * Add reuseport_enable toggle option for nginx listeners
+
+ -- Kaisen Chen <kaisen@yelp.com>  Wed, 26 Aug 2020 16:49:39 -0700
+
 synapse-tools (0.15.2) xenial; urgency=medium
 
   * don't write an empty ip map if the kubelet api returns an error
