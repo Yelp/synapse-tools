@@ -71,6 +71,7 @@ class EnvoyMigrationNamespaceConfig(TypedDict):
 
 class EnvoyMigrationConfig(TypedDict):
     migration_enabled: bool
+    reuseport_enabled: bool
     namespaces: Mapping[str, EnvoyMigrationNamespaceConfig]
 
 
@@ -714,6 +715,7 @@ def generate_configuration(
                             service_name=service_name,
                             service_info=cast(ServiceInfo, service_info),
                             synapse_tools_config=synapse_tools_config,
+                            envoy_migration_config=envoy_migration_config,
                         )
                     )
 
@@ -951,6 +953,7 @@ def _generate_nginx_for_watcher(
     service_name: str,
     service_info: ServiceInfo,
     synapse_tools_config: SynapseToolsConfig,
+    envoy_migration_config: EnvoyMigrationConfig,
 ) -> ServiceConfig:
     socket_path = _get_socket_path(
         synapse_tools_config,
@@ -985,7 +988,11 @@ def _generate_nginx_for_watcher(
         synapse_tools_config['listen_with_haproxy'] and
         synapse_tools_config['listen_with_nginx']
     )
-    if both_listen:
+    reuseport_enabled = (
+        envoy_migration_config['migration_enabled'] and
+        envoy_migration_config['reuseport_enabled']
+    )
+    if both_listen or reuseport_enabled:
         nginx_config['listen_options'] = 'reuseport'
 
     service: ServiceConfig = {
