@@ -12,6 +12,7 @@ from synapse_tools import configure_synapse
 
 STATUS_QUO_ENVOY_MIGRATION_CONFIG = {
     'migration_enabled': False,
+    'reuseport_enabled': False,
     'namespaces': {},
 }
 
@@ -1702,6 +1703,7 @@ def test_generate_configuration_envoy_migration_enabled(mock_get_current_locatio
         ],
         envoy_migration_config={
             'migration_enabled': True,
+            'reuseport_enabled': True,
             'namespaces': {
                 # service_1 intentionally omitted to test that the default is "synapse" mode.
                 'service_2': {'state': 'synapse'},
@@ -1710,12 +1712,15 @@ def test_generate_configuration_envoy_migration_enabled(mock_get_current_locatio
             },
         },
     )
-    # service_1 isn't in the namespace config, so defaults to enabled.
+    # service_1 isn't in the namespace config, so defaults to enabled. reuseport option should be set
     assert config['services']['service_1.nginx_listener']['nginx']['port'] == 1111
-    # service_2 is in "synapse" mode, so is enabled.
+    assert config['services']['service_1.nginx_listener']['nginx']['listen_options'] == 'reuseport'
+    # service_2 is in "synapse" mode, so is enabled. reuseport option should be set
     assert config['services']['service_2.nginx_listener']['nginx']['port'] == 2222
-    # service_3 is in "dual" mode, so is enabled.
+    assert config['services']['service_2.nginx_listener']['nginx']['listen_options'] == 'reuseport'
+    # service_3 is in "dual" mode, so is enabled. reuseport option should be set
     assert config['services']['service_3.nginx_listener']['nginx']['port'] == 3333
+    assert config['services']['service_3.nginx_listener']['nginx']['listen_options'] == 'reuseport'
     # service_4 is in "envoy" mode, so the nginx listener is gone but the
     # haproxy backend remains.
     assert 'service_4.nginx_listener' not in config['services']
@@ -1739,6 +1744,7 @@ def test_generate_configuration_envoy_migration_disabled(mock_get_current_locati
         ],
         envoy_migration_config={
             'migration_enabled': False,
+            'reuseport_enabled': False,
             'namespaces': {
                 'my_service': {'state': 'envoy'},
             },
@@ -1746,6 +1752,66 @@ def test_generate_configuration_envoy_migration_disabled(mock_get_current_locati
     )
     assert 'disabled' not in config['services']['my_service']
     assert config['services']['my_service']['haproxy']['port'] == '1111'
+
+
+def test_reuseport_enabled_disabled(mock_get_current_location, mock_available_location_types):
+    """If reuseport_enabled is False, don't output reuseport option for nginx listeners."""
+    config = configure_synapse.generate_configuration(
+        synapse_tools_config=configure_synapse.set_defaults({
+            'bind_addr': '0.0.0.0',
+            'listen_with_nginx': True,
+            'listen_with_haproxy': False,
+        }),
+        zookeeper_topology=['1.2.3.4', '2.3.4.5'],
+        services=[
+            (
+                'service_1',
+                {
+                    'proxy_port': 1111,
+                    'advertise': ['region'],
+                    'discover': 'region',
+                }
+            ),
+        ],
+        envoy_migration_config={
+            'migration_enabled': True,
+            'reuseport_enabled': False,
+            'namespaces': {},
+        },
+    )
+
+    assert config['services']['service_1.nginx_listener']['nginx']['port'] == 1111
+    assert 'listen_options' not in config['services']['service_1.nginx_listener']['nginx']
+
+
+def test_reuseport_enabled_and_migration_enabled_disabled(mock_get_current_location, mock_available_location_types):
+    """If migration_enabled is disabled, reuseport option should always be disabled."""
+    config = configure_synapse.generate_configuration(
+        synapse_tools_config=configure_synapse.set_defaults({
+            'bind_addr': '0.0.0.0',
+            'listen_with_nginx': True,
+            'listen_with_haproxy': False,
+        }),
+        zookeeper_topology=['1.2.3.4', '2.3.4.5'],
+        services=[
+            (
+                'service_1',
+                {
+                    'proxy_port': 1111,
+                    'advertise': ['region'],
+                    'discover': 'region',
+                }
+            ),
+        ],
+        envoy_migration_config={
+            'migration_enabled': False,
+            'reuseport_enabled': True,
+            'namespaces': {},
+        },
+    )
+
+    assert config['services']['service_1.nginx_listener']['nginx']['port'] == 1111
+    assert 'listen_options' not in config['services']['service_1.nginx_listener']['nginx']
 
 
 @contextlib.contextmanager
