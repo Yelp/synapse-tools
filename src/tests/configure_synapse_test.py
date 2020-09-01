@@ -118,7 +118,8 @@ def test_generate_configuration(mock_get_current_location, mock_available_locati
     )
 
     expected_configuration = configure_synapse.generate_base_config(
-        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'})
+        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'}),
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
     expected_configuration['services'] = {
         'test_service': {
@@ -298,7 +299,8 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts(mock_get_
     )
 
     expected_configuration = configure_synapse.generate_base_config(
-        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'})
+        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'}),
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
     expected_configuration['services'] = {
         'test_service': {
@@ -520,7 +522,8 @@ def test_generate_configuration_single_advertise_per_endpoint_timeouts_with_defa
     )
 
     expected_configuration = configure_synapse.generate_base_config(
-        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'})
+        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'}),
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
     expected_configuration['services'] = {
         'test_service': {
@@ -699,7 +702,8 @@ def test_generate_configuration_single_advertise(mock_get_current_location, mock
     )
 
     expected_configuration = configure_synapse.generate_base_config(
-        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'})
+        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'}),
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
     expected_configuration['services'] = {
         'test_service': {
@@ -767,7 +771,8 @@ def test_generate_configuration_empty(mock_available_location_types):
         envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
     expected_configuration = configure_synapse.generate_base_config(
-        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'})
+        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'}),
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
     assert actual_configuration == expected_configuration
 
@@ -812,7 +817,8 @@ def test_generate_configuration_with_proxied_through(mock_get_current_location, 
     )
 
     expected_configuration = configure_synapse.generate_base_config(
-        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'})
+        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'}),
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
     expected_configuration['services'] = {
         'proxy_service': {
@@ -953,7 +959,8 @@ def test_generate_configuration_with_nginx(mock_get_current_location, mock_avail
     )
 
     expected_configuration = configure_synapse.generate_base_config(
-        synapse_tools_config=synapse_tools_config
+        synapse_tools_config=synapse_tools_config,
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
     expected_configuration['services'] = {
         'test_service': {
@@ -1103,7 +1110,8 @@ def test_generate_configuration_only_nginx(mock_get_current_location, mock_avail
     )
 
     expected_configuration = configure_synapse.generate_base_config(
-        synapse_tools_config=synapse_tools_config
+        synapse_tools_config=synapse_tools_config,
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
     expected_configuration['services'] = {
         'test_service': {
@@ -1252,7 +1260,8 @@ def test_generate_configuration_with_source_required_plugin(mock_get_current_loc
     )
 
     expected_configuration = configure_synapse.generate_base_config(
-        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'})
+        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'}),
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
     expected_configuration['services'] = {
         'test_service': {
@@ -1365,7 +1374,8 @@ def test_generate_configuration_with_logging_plugin(mock_get_current_location, m
     )
 
     expected_configuration = configure_synapse.generate_base_config(
-        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'})
+        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'}),
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
     expected_configuration['services'] = {
         'proxy_service': {
@@ -1536,7 +1546,8 @@ def test_generate_configuration_with_multiple_plugins(mock_get_current_location,
     )
 
     expected_configuration = configure_synapse.generate_base_config(
-        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'})
+        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'}),
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
     expected_configuration['services'] = {
         'proxy_service': {
@@ -1814,6 +1825,59 @@ def test_reuseport_enabled_and_migration_enabled_disabled(mock_get_current_locat
     assert 'listen_options' not in config['services']['service_1.nginx_listener']['nginx']
 
 
+def test_registration_writer_not_in_migration_config(mock_get_current_location, mock_available_location_types):
+    """When registration_writer not in migration config, continue to include top-level "file_output" stanza in generated config"""
+    config = configure_synapse.generate_configuration(
+        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'}),
+        zookeeper_topology=[],
+        services=[],
+        envoy_migration_config={
+            'migration_enabled': False,
+            'reuseport_enabled': False,
+            'namespaces': {
+                'my_service': {'state': 'envoy'},
+            },
+        },
+    )
+    assert 'file_output' in config
+
+
+def test_registration_writer_set_to_synapse_in_migration_config(mock_get_current_location, mock_available_location_types):
+    """When registration_writer set to "synapse", continue to include top-level "file_output" stanza in generated config"""
+    config = configure_synapse.generate_configuration(
+        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'}),
+        zookeeper_topology=[],
+        services=[],
+        envoy_migration_config={
+            'migration_enabled': False,
+            'reuseport_enabled': False,
+            'namespaces': {
+                'my_service': {'state': 'envoy'},
+            },
+            'registration_writer': 'synapse',
+        },
+    )
+    assert 'file_output' in config
+
+
+def test_registration_writer_not_synapse_in_migration_config(mock_get_current_location, mock_available_location_types):
+    """When registration_writer is not "synapse", don't include top-level "file_output" stanza in generated config"""
+    config = configure_synapse.generate_configuration(
+        synapse_tools_config=configure_synapse.set_defaults({'bind_addr': '0.0.0.0'}),
+        zookeeper_topology=[],
+        services=[],
+        envoy_migration_config={
+            'migration_enabled': False,
+            'reuseport_enabled': False,
+            'namespaces': {
+                'my_service': {'state': 'envoy'},
+            },
+            'registration_writer': 'meshd',
+        },
+    )
+    assert 'file_output' not in config
+
+
 @contextlib.contextmanager
 def setup_mocks_for_main(tmpdir, config_file_path):
     """Write out config files and mock enough functions to run main()."""
@@ -1978,7 +2042,8 @@ def test_discovery_only_services(mock_get_current_location, mock_available_locat
     )
 
     expected_configuration = configure_synapse.generate_base_config(
-        synapse_tools_config=synapse_tools_config
+        synapse_tools_config=synapse_tools_config,
+        envoy_migration_config=STATUS_QUO_ENVOY_MIGRATION_CONFIG,
     )
     expected_configuration['services'] = {
         'test_service': {

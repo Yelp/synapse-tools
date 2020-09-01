@@ -69,10 +69,12 @@ class EnvoyMigrationNamespaceConfig(TypedDict):
     state: str
 
 
-class EnvoyMigrationConfig(TypedDict):
+class EnvoyMigrationConfig(TypedDict, total=False):
     migration_enabled: bool
     reuseport_enabled: bool
     namespaces: Mapping[str, EnvoyMigrationNamespaceConfig]
+    # optional for backwards compatibility
+    registration_writer: str
 
 
 HAProxyTopLevelConfigExtraSections = TypedDict(
@@ -436,14 +438,20 @@ def _generate_haproxy_top_level(
 
 def generate_base_config(
     synapse_tools_config: SynapseToolsConfig,
+    envoy_migration_config: EnvoyMigrationConfig,
 ) -> BaseConfig:
     synapse_tools_config = synapse_tools_config
     base_config: BaseConfig = {
         # We'll fill this section in
         'services': {},
-        'file_output': {'output_directory': synapse_tools_config['file_output_path']},
         'haproxy': _generate_haproxy_top_level(synapse_tools_config)
     }
+
+    # When file_output stanza is absent, synapse won't write service registration
+    # json files to /var/run/synapse/services
+    registration_writer = envoy_migration_config.get('registration_writer', 'synapse')
+    if registration_writer == 'synapse':
+        base_config['file_output'] = {'output_directory': synapse_tools_config['file_output_path']}
 
     if synapse_tools_config['listen_with_nginx']:
         base_config['nginx'] = _generate_nginx_top_level(synapse_tools_config)
@@ -584,7 +592,7 @@ def generate_configuration(
     services: Iterable[Tuple[str, ServiceNamespaceConfig]],
     envoy_migration_config: EnvoyMigrationConfig,
 ) -> BaseConfig:
-    synapse_config = generate_base_config(synapse_tools_config)
+    synapse_config = generate_base_config(synapse_tools_config, envoy_migration_config)
     available_locations = available_location_types()
     location_depth_mapping = {
         loc: depth
