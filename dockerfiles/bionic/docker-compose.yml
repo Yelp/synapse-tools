@@ -2,6 +2,7 @@ version: '2.4'
 services:
   bionic:
     build: ../../dockerfiles/bionic
-    command: bash -c "cd src && tox -ebionic && dpkg-buildpackage -d -uc -us && mv ../*.deb ../dist/"
+    # See https://github.com/pypa/setuptools/issues/2355 for why SETUPTOOLS_USE_DISTUTILS must be set
+    command: bash -c "cd src && tox -ebionic && SETUPTOOLS_USE_DISTUTILS=stdlib dpkg-buildpackage -d -uc -us && mv ../*.deb ../dist/"
     volumes:
      - ../..:/work
