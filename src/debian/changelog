@@ -1,3 +1,9 @@
+synapse-tools (0.16.0) xenial; urgency=medium
+
+  * Add toggle to envoy_migration.yaml to toggle writing service registrations
+
+ -- Semir Patel <spatel@yelp.com>  Tue, 08 Sep 2020 08:33:29 -0700
+
 synapse-tools (0.15.3) xenial; urgency=medium
 
   * Add reuseport_enable toggle option for nginx listeners

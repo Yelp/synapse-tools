@@ -14,10 +14,10 @@ def get_install_requires():
 
 setup(
     name='synapse-tools',
-    version='0.15.3',
+    version='0.16.0',
     provides=['synapse_tools'],
-    author='John Billings',
-    author_email='billings@yelp.com',
+    author='Compute Infra',
+    author_email='compute-infra@yelp.com',
     description='Synapse-related tools for use on Yelp machines',
     packages=find_packages(exclude=['tests']),
     setup_requires=['setuptools'],
