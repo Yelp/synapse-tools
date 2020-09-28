@@ -2,3 +2,4 @@ opt/venvs/synapse-tools/bin/configure_synapse usr/bin/configure_synapse
 opt/venvs/synapse-tools/bin/generate_container_ip_map usr/bin/generate_container_ip_map
 opt/venvs/synapse-tools/bin/haproxy_synapse_reaper usr/bin/haproxy_synapse_reaper
 opt/venvs/synapse-tools/bin/synapse_qdisc_tool usr/bin/synapse_qdisc_tool
+opt/venvs/synapse-tools/bin/synapse-tools-reload-nginx.sh usr/bin/synapse-tools-reload-nginx
