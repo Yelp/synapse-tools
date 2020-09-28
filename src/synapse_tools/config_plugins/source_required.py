@@ -13,21 +13,19 @@ class SourceRequired(HAProxyConfigPlugin):
         service_info: ServiceInfo,
         synapse_tools_config: SynapseToolsConfig,
     ) -> None:
-        super(SourceRequired, self).__init__(
-            service_name, service_info, synapse_tools_config
-        )
+        super().__init__(service_name, service_info, synapse_tools_config)
 
-        self.enabled = self.plugins.get('source_required', {}).get('enabled', False)
+        self.enabled = self.plugins.get("source_required", {}).get("enabled", False)
         self.prepend_backend_options = True
 
     def global_options(self) -> Iterable[str]:
         if not self.enabled:
             return []
 
-        lua_dir = self.synapse_tools_config['lua_dir']
-        lua_file = os.path.join(lua_dir, 'add_source_header.lua')
+        lua_dir = self.synapse_tools_config["lua_dir"]
+        lua_file = os.path.join(lua_dir, "add_source_header.lua")
         opts = [
-            'lua-load %s' % lua_file,
+            "lua-load %s" % lua_file,
         ]
 
         return opts
@@ -41,6 +39,4 @@ class SourceRequired(HAProxyConfigPlugin):
     def backend_options(self) -> Iterable[str]:
         if not self.enabled:
             return []
-        return [
-            'http-request lua.add_source_header'
-        ]
+        return ["http-request lua.add_source_header"]

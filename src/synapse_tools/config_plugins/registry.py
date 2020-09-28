@@ -9,10 +9,12 @@ from synapse_tools.config_plugins.path_based_routing import PathBasedRouting
 from synapse_tools.config_plugins.proxied_through import ProxiedThrough
 from synapse_tools.config_plugins.source_required import SourceRequired
 
-PLUGIN_REGISTRY: Mapping[str, Type[HAProxyConfigPlugin]] = OrderedDict([
-    ('fault_injection', FaultInjection),
-    ('proxied_through', ProxiedThrough),
-    ('logging', Logging),
-    ('path_based_routing', PathBasedRouting),
-    ('source_required', SourceRequired),
-])
+PLUGIN_REGISTRY: Mapping[str, Type[HAProxyConfigPlugin]] = OrderedDict(
+    [
+        ("fault_injection", FaultInjection),
+        ("proxied_through", ProxiedThrough),
+        ("logging", Logging),
+        ("path_based_routing", PathBasedRouting),
+        ("source_required", SourceRequired),
+    ]
+)
