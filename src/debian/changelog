@@ -2,6 +2,12 @@ synapse-tools (0.17.0) xenial; urgency=medium
 
   * Released 0.17.0 via make release
 
+ -- Valeriy Khromov <vkhromov@yelp.com>  Wed, 30 Sep 2020 04:01:47 -0700
+
+synapse-tools (0.17.0) xenial; urgency=medium
+
+  * Released 0.17.0 via make release
+
  -- Valeriy Khromov <vkhromov@yelp.com>  Wed, 30 Sep 2020 04:01:10 -0700
 
 synapse-tools (0.16.0) xenial; urgency=medium
