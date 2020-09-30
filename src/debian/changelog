@@ -1,3 +1,17 @@
+synapse-tools (0.17.0) xenial; urgency=medium
+
+  * Merge pull request #92 from Yelp/fix-nginx-doesnt-reload-second-time
+    Fix nginx reload doesn"t work second time
+
+ -- Valeriy Khromov <vkhromov@yelp.com>  Wed, 30 Sep 2020 04:00:50 -0700
+
+synapse-tools (0.17.0) xenial; urgency=medium
+
+  * Merge pull request #92 from Yelp/fix-nginx-doesnt-reload-second-time
+    Fix nginx reload doesn"t work second time
+
+ -- Valeriy Khromov <vkhromov@yelp.com>  Wed, 30 Sep 2020 04:00:26 -0700
+
 synapse-tools (0.16.0) xenial; urgency=medium
 
   * Add toggle to envoy_migration.yaml to toggle writing service registrations
