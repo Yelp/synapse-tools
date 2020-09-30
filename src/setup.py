@@ -31,4 +31,7 @@ setup(
             'synapse_qdisc_tool=synapse_tools.haproxy.qdisc_tool:main',
         ],
     },
+    scripts=[
+        "synapse-tools-reload-nginx.sh",
+    ],
 )
