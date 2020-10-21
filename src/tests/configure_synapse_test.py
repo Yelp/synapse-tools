@@ -1716,16 +1716,17 @@ def test_generate_configuration_envoy_migration_enabled(mock_get_current_locatio
             'migration_enabled': True,
             'reuseport_enabled': True,
             'namespaces': {
-                # service_1 intentionally omitted to test that the default is "synapse" mode.
+                # service_1 intentionally omitted to test that the default is "envoy" mode.
                 'service_2': {'state': 'synapse'},
                 'service_3': {'state': 'dual'},
                 'service_4': {'state': 'envoy'},
             },
         },
     )
-    # service_1 isn't in the namespace config, so defaults to enabled. reuseport option should be set
-    assert config['services']['service_1.nginx_listener']['nginx']['port'] == 1111
-    assert config['services']['service_1.nginx_listener']['nginx']['listen_options'] == 'reuseport'
+    # service_1 isn't in the namespace config, so defaults to envoy mode (nginx listener is
+    # gone but the haproxy backend remains)
+    assert 'service_1.nginx_listener' not in config['services']
+    assert config['services']['service_1']['haproxy']['bind_address'] == '/var/run/synapse/sockets/service_1.sock'
     # service_2 is in "synapse" mode, so is enabled. reuseport option should be set
     assert config['services']['service_2.nginx_listener']['nginx']['port'] == 2222
     assert config['services']['service_2.nginx_listener']['nginx']['listen_options'] == 'reuseport'
@@ -1787,7 +1788,9 @@ def test_reuseport_enabled_disabled(mock_get_current_location, mock_available_lo
         envoy_migration_config={
             'migration_enabled': True,
             'reuseport_enabled': False,
-            'namespaces': {},
+            'namespaces': {
+                'service_1': {'state': 'synapse'},
+            },
         },
     )
 

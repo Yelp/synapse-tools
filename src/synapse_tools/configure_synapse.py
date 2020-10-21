@@ -608,7 +608,7 @@ def generate_configuration(
 
         namespace_is_envoy_only = (
             envoy_migration_config['migration_enabled'] and
-            envoy_migration_config['namespaces'].get(service_name, {'state': 'synapse'}).get('state') == 'envoy'
+            envoy_migration_config['namespaces'].get(service_name, {'state': 'envoy'}).get('state') == 'envoy'
         )
 
         # Note that at this point proxy_port can be:
