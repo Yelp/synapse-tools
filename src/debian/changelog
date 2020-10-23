@@ -1,3 +1,10 @@
+synapse-tools (0.18.0) xenial; urgency=medium
+
+  * Default to Envoy instead of Synapse if a namespace is not defined on
+    envoy_migration.yaml
+
+ -- gabrielv <gabrielv@yelp.com>  Fri, 23 Oct 2020 05:42:17 -0700
+
 synapse-tools (0.17.0) xenial; urgency=medium
 
   * Released 0.17.0 via make release
