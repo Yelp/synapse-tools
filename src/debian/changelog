@@ -1,3 +1,10 @@
+synapse-tools (0.18.0) xenial; urgency=medium
+
+  * Merge pull request #94 from Yelp/u/gabrielv/MESH-1010-default-envoy-
+    mode  MESH-1010 Default to Envoy mode
+
+ -- Gabriel Volcovinsky <gabrielv@yelp.com>  Fri, 23 Oct 2020 05:42:17 -0700
+
 synapse-tools (0.17.0) xenial; urgency=medium
 
   * Released 0.17.0 via make release
