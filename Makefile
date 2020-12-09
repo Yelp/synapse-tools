@@ -2,6 +2,9 @@ export PIP_INDEX_URL ?= https://pypi.yelpcorp.com/simple
 DATE := $(shell date +'%Y-%m-%d')
 SYNAPSETOOLSVERSION := $(shell sed 's/.*(\(.*\)).*/\1/;q' src/debian/changelog)
 
+.PHONY: test
+test:
+
 .PHONY: bintray_%
 bintray_%: bintray.json.in src/debian/changelog
 	sed -e 's/@DATE@/$(DATE)/g' \
