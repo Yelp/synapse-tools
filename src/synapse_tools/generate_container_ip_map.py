@@ -66,18 +66,24 @@ def extract_taskid_and_ip_k8s() -> Iterable[Tuple[str, str]]:
     node_info = requests.get("http://169.254.255.254:10255/pods/").json()
 
     for pod in node_info['items']:
-        labels = pod['metadata']['labels']
-        service = labels.get('paasta.yelp.com/service')
-        instance = labels.get('paasta.yelp.com/instance')
-        status = pod['status'].get('phase')
+        pod_name = pod['metadata']['name']
+        try:
+            labels = pod['metadata']['labels']
+            service = labels.get('paasta.yelp.com/service')
+            instance = labels.get('paasta.yelp.com/instance')
+            status = pod['status'].get('phase')
 
-        if service is not None and \
-           instance is not None and \
-           status != 'Failed' and \
-           'podIP' in pod['status']:
-            task_id = f'{service}.{instance}'.replace('_', '--')
-            pod_ip = pod['status']['podIP']
-            service_ips_and_ids.append((pod_ip, task_id))
+            if service is not None and \
+               instance is not None and \
+               status != 'Failed' and \
+               'podIP' in pod['status']:
+                task_id = f'{service}.{instance}'.replace('_', '--')
+                pod_ip = pod['status']['podIP']
+                service_ips_and_ids.append((pod_ip, task_id))
+        except KeyError as e:
+            print("Skipping pod '{}': {} not found in pod metadata".format(pod_name, e))
+        except Exception as e:
+            print("Skipping pod '{}' due to unknown error:".format(pod_name), e)
 
     return service_ips_and_ids
 
