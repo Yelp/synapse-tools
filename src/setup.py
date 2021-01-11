@@ -14,7 +14,7 @@ def get_install_requires():
 
 setup(
     name='synapse-tools',
-    version='0.18.0',
+    version='0.18.1',
     provides=['synapse_tools'],
     author='Compute Infra',
     author_email='compute-infra@yelp.com',
